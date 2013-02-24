@@ -217,7 +217,18 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_depthfirst(self, goals):
-    return
+	nodes = Queue.LifoQueue(10)
+	nodes.put(self.robot.GetActiveDOFValues())
+	#path = {
+	print 'test'
+	while not nodes.empty():
+		currentNode = nodes.get()
+		#find neighbors
+		print currentNode
+		#searching.put
+	print 'out of loop'
+
+	return 0
 
   ### TODO ###  
   #######################################################
@@ -339,6 +350,9 @@ class RoboHandler:
 
 
 if __name__ == '__main__':
-  robo = RoboHandler()
+	robo = RoboHandler()
+	temp_goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+	robo.search_to_goal_depthfirst(temp_goal)
+  #run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
   
