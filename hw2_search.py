@@ -272,10 +272,15 @@ class RoboHandler:
   # can move any joint in a step (defined above)
   #######################################################
   def init_transition_arrays(self):
+<<<<<<< HEAD
     n_indices = 7 
     iden = np.matrix(np.identity(7))
     self.transition_arrays = np.concatenate(TRANS_PER_DIR*iden, -1*TRANS_PER_DIR*iden)
     print self.transition_arrays
+=======
+#######  SSR  #####
+    self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
+>>>>>>> b61bd987a482bfda61043bf22e648e6d945183c7
     return
 
 
@@ -285,7 +290,8 @@ class RoboHandler:
   # transition arrays to it
   #######################################################
   def transition_config(self, config):
-    new_configs = []
+######## SSR  #######      
+    new_configs = [currnode+self.transition_arrays(1),]
     return new_configs
 
 
@@ -343,5 +349,5 @@ class RoboHandler:
 
 if __name__ == '__main__':
   robo = RoboHandler()
-  #time.sleep(10000) #to keep the openrave window open
+  time.sleep(10000) #to keep the openrave window open
   
