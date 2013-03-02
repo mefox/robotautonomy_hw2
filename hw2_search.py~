@@ -295,22 +295,12 @@ class RoboHandler:
   # can move any joint in a step (defined above)
   #######################################################
   def init_transition_arrays(self):
-<<<<<<< HEAD
-    np.matrix(np.identity(7))
-    self.transition_arrays = np.concatenate(TRANS_PER_DIR*np.matrix(np.identity(7)), -1*TRANS_PER_DIR*np.matrix(np.identity(7)))
-    
-=======
 #######  SSR  #####
-<<<<<<< HEAD
-    self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
->>>>>>> b61bd987a482bfda61043bf22e648e6d945183c7
-=======
 	positive_transition = np.identity(7)*TRANS_PER_DIR;
 	negative_transition= positive_transition*-1;
 	self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
 
     #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
->>>>>>> 1dbe310e092b3a8c42ed6d09ab1796cbba813aa0
     return
 
 
