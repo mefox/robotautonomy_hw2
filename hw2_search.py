@@ -273,10 +273,9 @@ class RoboHandler:
   #######################################################
   def init_transition_arrays(self):
 <<<<<<< HEAD
-    n_indices = 7 
-    iden = np.matrix(np.identity(7))
-    self.transition_arrays = np.concatenate(TRANS_PER_DIR*iden, -1*TRANS_PER_DIR*iden)
-    print self.transition_arrays
+    np.matrix(np.identity(7))
+    self.transition_arrays = np.concatenate(TRANS_PER_DIR*np.matrix(np.identity(7)), -1*TRANS_PER_DIR*np.matrix(np.identity(7)))
+    
 =======
 #######  SSR  #####
     self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
