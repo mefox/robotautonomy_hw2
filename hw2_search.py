@@ -284,7 +284,7 @@ class RoboHandler:
   #######################################################
   def transition_config(self, config):
 ######## SSR  #######      
-    new_configs = [currnode+self.transition_arrays(1),]
+    new_configs = [config+self.transition_arrays(1),]
     return new_configs
 
 
