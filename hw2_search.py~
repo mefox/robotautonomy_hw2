@@ -310,17 +310,12 @@ class RoboHandler:
   # transition arrays to it
   #######################################################
   def transition_config(self, config):
-<<<<<<< HEAD
-######## SSR  #######      
-    new_configs = [config+self.transition_arrays(1),]
-=======
     ######## SSR  ######
     new_configs = np.array([]) #define blank array
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
 
->>>>>>> 1dbe310e092b3a8c42ed6d09ab1796cbba813aa0
     return new_configs
 
 
