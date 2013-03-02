@@ -272,7 +272,10 @@ class RoboHandler:
   # can move any joint in a step (defined above)
   #######################################################
   def init_transition_arrays(self):
-    self.transition_arrays = []
+    n_indices = 7 
+    iden = np.matrix(np.identity(7))
+    self.transition_arrays = np.concatenate(TRANS_PER_DIR*iden, -1*TRANS_PER_DIR*iden)
+    print self.transition_arrays
     return
 
 
