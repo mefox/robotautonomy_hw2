@@ -216,18 +216,30 @@ class RoboHandler:
   # goals: list of possible goal configurations
   # RETURN: a trajectory to the goal
   #######################################################
+  ##########MARSH###############
   def search_to_goal_depthfirst(self, goals):
-	nodes = Queue.LifoQueue(10)
+    visited_nodes = {}
+    nodes = Queue.LifoQueue()
 	nodes.put(self.robot.GetActiveDOFValues())
-	#path = {
 	print 'test'
-	while not nodes.empty():
-		currentNode = nodes.get()
-		#find neighbors
-		print currentNode
-		#searching.put
-	print 'out of loop'
 
+    for g in goals: #for each of the goal states
+        goal_reached = False
+	    while not nodes.empty() and not goal_reached: #while the queue has nodes
+		    currentNode = nodes.get() #pop the next node
+            if currentNode == g: #check if we reached the current goal
+                goal_reached = True                
+                continue #jump out of the loop
+
+		    neighbors = transition_config(currentNode)
+            
+            for c in neighbors:
+                if not c in visited_nodes:
+                    visited_nodes[c] = currentNode
+                    nodes.put(c)
+            
+		    print currentNode
+        print 'Found goal' + g
 	return 0
 
   ### TODO ###  
@@ -284,7 +296,11 @@ class RoboHandler:
   #######################################################
   def init_transition_arrays(self):
 #######  SSR  #####
-    self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
+	positive_transition = np.identity(7)*TRANS_PER_DIR;
+	negative_transition= positive_transition*-1;
+	self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
+
+    #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
     return
 
 
@@ -294,8 +310,12 @@ class RoboHandler:
   # transition arrays to it
   #######################################################
   def transition_config(self, config):
-######## SSR  #######      
-    new_configs = [currnode+self.transition_arrays(1),]
+    ######## SSR  ######
+    new_configs = np.array([]) #define blank array
+    for c in self.transition_arrays: #loop through columns
+        new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
+    new_configs = np.reshape(new_configs, (14, 7)) #reshape
+
     return new_configs
 
 
