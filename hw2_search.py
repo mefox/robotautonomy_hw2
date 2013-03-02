@@ -220,11 +220,12 @@ class RoboHandler:
   def search_to_goal_depthfirst(self, goals):
     visited_nodes = {}
     nodes = Queue.LifoQueue()
-	nodes.put(self.robot.GetActiveDOFValues())
-	print 'test'
-
+    start = self.robot.GetActiveDOFValues()
+    nodes.put(start)
+    print 'test'
+   
     for g in goals: #for each of the goal states
-        goal_reached = False
+            goal_reached = False
 	    while not nodes.empty() and not goal_reached: #while the queue has nodes
 		    currentNode = nodes.get() #pop the next node
             if currentNode == g: #check if we reached the current goal
@@ -238,9 +239,17 @@ class RoboHandler:
                     visited_nodes[c] = currentNode
                     nodes.put(c)
             
-		    print currentNode
-        print 'Found goal' + g
-	return 0
+#		    print currentNode
+	    r= currentNode                                                      #Ankit
+            while r != start
+                trajectory = np.append(trajectory,r)
+                r = visited_nodes[r]
+            start = g
+
+     trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+
+    print 'Found goal' + g
+    return trajectory                                                           #Ankit #~Ankit
 
   ### TODO ###  
   #######################################################
@@ -310,17 +319,12 @@ class RoboHandler:
   # transition arrays to it
   #######################################################
   def transition_config(self, config):
-<<<<<<< HEAD
-######## SSR  #######      
-    new_configs = [config+self.transition_arrays(1),]
-=======
     ######## SSR  ######
     new_configs = np.array([]) #define blank array
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
 
->>>>>>> 1dbe310e092b3a8c42ed6d09ab1796cbba813aa0
     return new_configs
 
 
@@ -377,14 +381,9 @@ class RoboHandler:
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
 	robo = RoboHandler()
-	temp_goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+	temp_goal = [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
 	robo.search_to_goal_depthfirst(temp_goal)
   #run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
-=======
-  robo = RoboHandler()
-  time.sleep(10000) #to keep the openrave window open
->>>>>>> b61bd987a482bfda61043bf22e648e6d945183c7
-  
+
