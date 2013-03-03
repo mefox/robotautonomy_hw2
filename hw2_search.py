@@ -225,29 +225,29 @@ class RoboHandler:
     print 'test'
     trajectory = np.array([])
     for g in goals: #for each of the goal states
-            goal_reached = False
-	    while not nodes.empty() and not goal_reached: #while the queue has nodes
-		    currentNode = nodes.get() #pop the next node
-            	    if np.allclose(currentNode,g): #check if we reached the current goal
-                        goal_reached = True                
-                        continue #jump out of the loop
+        goal_reached = False
+        while not nodes.empty() and not goal_reached: #while the queue has nodes
+            currentNode = nodes.get() #pop the next node
+            if np.allclose(currentNode,g): #check if we reached the current goal
+                goal_reached = True                
+                continue #jump out of the loop
 
-	            neighbors = self.transition_config(currentNode)
+                neighbors = self.transition_config(currentNode)
             
-            	    for c in neighbors:
-                        if not self.convert_for_dict(c) in visited_nodes.keys():
+                for c in neighbors:
+                    if not self.convert_for_dict(c) in visited_nodes.keys():
                             visited_nodes[self.convert_for_dict(c)] = currentNode
-                    	    nodes.put(c)
-            	        print np.size(c)		
-		     
-	    r= currentNode                                                      #Ankit
-            while r is not start:
+                            nodes.put(c)
+                    print np.size(c)        
+             
+        r= currentNode                                                      #Ankit
+        while r is not start:
                 trajectory = np.append(trajectory,r)
                 r = visited_nodes[self.convert_for_dict(r)]
-     	    start = g
-	    
-	    #nodes.queue.clear()
-	    nodes.put(start)
+        start = g
+        
+        #nodes.queue.clear()
+        nodes.put(start)
     trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
     print 'Found goal' + g
@@ -271,29 +271,29 @@ class RoboHandler:
     trajectory = np.array([])
     for g in goals: #for each of the goal states
         goal_reached = False
-	    while not nodes.empty() and not goal_reached: #while the queue has nodes
-		    currentNode = nodes.get() #pop the next node
-            	    if np.allclose(currentNode,g): #check if we reached the current goal
+        while not nodes.empty() and not goal_reached: #while the queue has nodes
+            currentNode = nodes.get() #pop the next node
+            if np.allclose(currentNode,g): #check if we reached the current goal
                         goal_reached = True                
                         continue #jump out of the loop
 
-	        neighbors = self.transition_config(currentNode)
+            neighbors = self.transition_config(currentNode)
             
             for c in neighbors:
-	             if not self.check_collision(c):
-    	         	if not self.convert_for_dict(c) in visited_nodes.keys():
-        	        	visited_nodes[self.convert_for_dict(c)] = currentNode
-						nodes.put(c)
-            		    #print c	
-		    #print currentNode 
-  			r= currentNode                                                      #Ankit
-            while r is not start:
-            	trajectory = np.append(trajectory,r)
+                 if not self.check_collision(c):
+                     if not self.convert_for_dict(c) in visited_nodes.keys():
+                        visited_nodes[self.convert_for_dict(c)] = currentNode
+                        nodes.put(c)
+                        #print c    
+            #print currentNode 
+        r= currentNode                                                      #Ankit
+        while r is not start:
+                trajectory = np.append(trajectory,r)
                 r = visited_nodes[self.convert_for_dict(r)]
-     	    start = g
-		while not nodes.empty():	    
-	    	nodes.get()
-	    nodes.put(start)
+        start = g
+        while not nodes.empty():        
+            nodes.get()
+        nodes.put(start)
     trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
     print g
@@ -310,14 +310,21 @@ class RoboHandler:
   def search_to_goal_astar(self, goals):
     return
 
+
+
+
+
+###################################################
+#  Collision Check
+###################################################
   def check_collision(self, DOFs):
     current_DOFs = self.robot.GetActiveDOFValues()
-	with self.env:
-		self.robot.SetActiveDOFValues(DOFs)
-		collision1 = self.env.CheckCollision(robot) 
-		collision2 = self.robot.CheckSelfCollision()
-		self.robot.SetActiveDOFValues(current_DOFs)
-	return collision1 or collision2
+    with self.env:
+        self.robot.SetActiveDOFValues(DOFs)
+        collision1 = self.env.CheckCollision(self.robot) 
+        collision2 = self.robot.CheckSelfCollision()
+        self.robot.SetActiveDOFValues(current_DOFs)
+    return collision1 or collision2
 
   ### TODO ###  (not required but I found it useful)
   #######################################################
@@ -351,12 +358,12 @@ class RoboHandler:
   #######################################################
   def init_transition_arrays(self):
 #######  SSR  #####
-	positive_transition = np.identity(7)*TRANS_PER_DIR;
-	negative_transition= positive_transition*-1;
-	self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
+    positive_transition = np.identity(7)*TRANS_PER_DIR;
+    negative_transition= positive_transition*-1;
+    self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
 
     #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
-    	return 
+    return 
 
 
   ### TODO ###  (not required but I found it useful)
@@ -427,11 +434,10 @@ class RoboHandler:
 
 
 if __name__ == '__main__':
-	robo = RoboHandler()
-	temp_goal = [ [0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
-	robo.init_transition_arrays()
-	#robo.search_to_goal_depthfirst(temp_goal)
-	robo.search_to_goal_breadthfirst(temp_goal)
+    robo = RoboHandler()
+    temp_goal = [ [0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
+    robo.init_transition_arrays()
+    #robo.search_to_goal_depthfirst(temp_goal)
+    robo.search_to_goal_breadthfirst(temp_goal)
   #run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
-
