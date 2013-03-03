@@ -116,7 +116,7 @@ class RoboHandler:
       self.robot.SetDOFValues(self.grasps[0][self.graspindices['igrasppreshape']], self.manip.GetGripperIndices()) # move to preshape
     
     
-    self.init_transition_arrays()
+    self.self.tnit_transition_arrays()
     goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
     with self.env:
       self.robot.SetActiveDOFValues([ 1.23, -1.10, -0.3,  2.37, -0.23, -1.29, -2.23])
@@ -228,25 +228,25 @@ class RoboHandler:
             goal_reached = False
 	    while not nodes.empty() and not goal_reached: #while the queue has nodes
 		    currentNode = nodes.get() #pop the next node
-            if currentNode == g: #check if we reached the current goal
+            if (currentNode == g).all(): #check if we reached the current goal
                 goal_reached = True                
                 continue #jump out of the loop
 
-		    neighbors = transition_config(currentNode)
+	    neighbors = self.transition_config(currentNode)
             
             for c in neighbors:
-                if not c in visited_nodes:
+                if not c in visited_nodes.keys():
                     visited_nodes[c] = currentNode
                     nodes.put(c)
             
 #		    print currentNode
 	    r= currentNode                                                      #Ankit
-            while r != start
+            while r is not start:
                 trajectory = np.append(trajectory,r)
                 r = visited_nodes[r]
             start = g
 
-     trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+    trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
     print 'Found goal' + g
     return trajectory                                                           #Ankit #~Ankit
@@ -310,7 +310,7 @@ class RoboHandler:
 	self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
 
     #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
-    return
+    	return 
 
 
   ### TODO ###  (not required but I found it useful)
@@ -383,6 +383,7 @@ class RoboHandler:
 if __name__ == '__main__':
 	robo = RoboHandler()
 	temp_goal = [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+	robo.init_transition_arrays()
 	robo.search_to_goal_depthfirst(temp_goal)
   #run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
