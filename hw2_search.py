@@ -228,7 +228,7 @@ class RoboHandler:
             goal_reached = False
 	    while not nodes.empty() and not goal_reached: #while the queue has nodes
 		    currentNode = nodes.get() #pop the next node
-            	    if (currentNode == g).all(): #check if we reached the current goal
+            	    if np.allclose(currentNode,g): #check if we reached the current goal
                         goal_reached = True                
                         continue #jump out of the loop
 
@@ -238,14 +238,16 @@ class RoboHandler:
                         if not self.convert_for_dict(c) in visited_nodes.keys():
                             visited_nodes[self.convert_for_dict(c)] = currentNode
                     	    nodes.put(c)
-            			
+            	        print np.size(c)		
 		     
 	    r= currentNode                                                      #Ankit
             while r is not start:
                 trajectory = np.append(trajectory,r)
                 r = visited_nodes[self.convert_for_dict(r)]
      	    start = g
-
+	    
+	    #nodes.queue.clear()
+	    nodes.put(start)
     trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
     print 'Found goal' + g
@@ -264,13 +266,14 @@ class RoboHandler:
     nodes = Queue.PriorityQueue()
     start = self.robot.GetActiveDOFValues()
     nodes.put(start)
+    print nodes
     print 'test'
     trajectory = np.array([])
     for g in goals: #for each of the goal states
             goal_reached = False
 	    while not nodes.empty() and not goal_reached: #while the queue has nodes
 		    currentNode = nodes.get() #pop the next node
-            	    if (currentNode == g).all(): #check if we reached the current goal
+            	    if np.allclose(currentNode,g): #check if we reached the current goal
                         goal_reached = True                
                         continue #jump out of the loop
 
@@ -279,18 +282,20 @@ class RoboHandler:
             	    for c in neighbors:
                         if not self.convert_for_dict(c) in visited_nodes.keys():
                             visited_nodes[self.convert_for_dict(c)] = currentNode
-                    	    nodes.put(c)
-            			
-		    print currentNode 
+                    	    #nodes.put(c)
+            		    #print c	
+		    #print currentNode 
 	    r= currentNode                                                      #Ankit
             while r is not start:
                 trajectory = np.append(trajectory,r)
                 r = visited_nodes[self.convert_for_dict(r)]
      	    start = g
-
+   	    while not nodes.empty():	    
+	    	nodes.get()
+	    nodes.put(start)
     trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
-    print 'Found goal' + g
+    print g
     return trajectory
 
 
@@ -414,9 +419,9 @@ class RoboHandler:
 
 if __name__ == '__main__':
 	robo = RoboHandler()
-	temp_goal = [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+	temp_goal = [ [0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
 	robo.init_transition_arrays()
-	
+	#robo.search_to_goal_depthfirst(temp_goal)
 	robo.search_to_goal_breadthfirst(temp_goal)
   #run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
