@@ -248,7 +248,7 @@ class RoboHandler:
         
         #nodes.queue.clear()
         nodes.put(start)
-    trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+    trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
     print 'Found goal' + g
     return trajectory                                                           #Ankit #~Ankit
