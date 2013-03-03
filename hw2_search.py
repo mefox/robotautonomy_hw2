@@ -270,30 +270,31 @@ class RoboHandler:
     print 'test'
     trajectory = np.array([])
     for g in goals: #for each of the goal states
-            goal_reached = False
+        goal_reached = False
 	    while not nodes.empty() and not goal_reached: #while the queue has nodes
 		    currentNode = nodes.get() #pop the next node
             	    if np.allclose(currentNode,g): #check if we reached the current goal
                         goal_reached = True                
                         continue #jump out of the loop
 
-	            neighbors = self.transition_config(currentNode)
+	        neighbors = self.transition_config(currentNode)
             
-            	    for c in neighbors:
-                        if not self.convert_for_dict(c) in visited_nodes.keys():
-                            visited_nodes[self.convert_for_dict(c)] = currentNode
-                    	    #nodes.put(c)
+            for c in neighbors:
+	             if not self.check_collision(c):
+    	         	if not self.convert_for_dict(c) in visited_nodes.keys():
+        	        	visited_nodes[self.convert_for_dict(c)] = currentNode
+						nodes.put(c)
             		    #print c	
 		    #print currentNode 
-	    r= currentNode                                                      #Ankit
+  			r= currentNode                                                      #Ankit
             while r is not start:
-                trajectory = np.append(trajectory,r)
+            	trajectory = np.append(trajectory,r)
                 r = visited_nodes[self.convert_for_dict(r)]
      	    start = g
-   	    while not nodes.empty():	    
+		while not nodes.empty():	    
 	    	nodes.get()
 	    nodes.put(start)
-    trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+    trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
     print g
     return trajectory
@@ -309,6 +310,14 @@ class RoboHandler:
   def search_to_goal_astar(self, goals):
     return
 
+  def check_collision(self, DOFs):
+    current_DOFs = self.robot.GetActiveDOFValues()
+	with self.env:
+		self.robot.SetActiveDOFValues(DOFs)
+		collision1 = self.env.CheckCollision(robot) 
+		collision2 = self.robot.CheckSelfCollision()
+		self.robot.SetActiveDOFValues(current_DOFs)
+	return collision1 or collision2
 
   ### TODO ###  (not required but I found it useful)
   #######################################################
