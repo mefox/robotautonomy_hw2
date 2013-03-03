@@ -223,28 +223,28 @@ class RoboHandler:
     start = self.robot.GetActiveDOFValues()
     nodes.put(start)
     print 'test'
-   
+    trajectory = np.array([])
     for g in goals: #for each of the goal states
             goal_reached = False
 	    while not nodes.empty() and not goal_reached: #while the queue has nodes
 		    currentNode = nodes.get() #pop the next node
-            if (currentNode == g).all(): #check if we reached the current goal
-                goal_reached = True                
-                continue #jump out of the loop
+            	    if (currentNode == g).all(): #check if we reached the current goal
+                        goal_reached = True                
+                        continue #jump out of the loop
 
-	    neighbors = self.transition_config(currentNode)
+	            neighbors = self.transition_config(currentNode)
             
-            for c in neighbors:
-                if not c in visited_nodes.keys():
-                    visited_nodes[c] = currentNode
-                    nodes.put(c)
-            
-#		    print currentNode
+            	    for c in neighbors:
+                        if not self.convert_for_dict(c) in visited_nodes.keys():
+                            visited_nodes[self.convert_for_dict(c)] = currentNode
+                    	    nodes.put(c)
+            			
+		     
 	    r= currentNode                                                      #Ankit
             while r is not start:
                 trajectory = np.append(trajectory,r)
-                r = visited_nodes[r]
-            start = g
+                r = visited_nodes[self.convert_for_dict(r)]
+     	    start = g
 
     trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
@@ -259,7 +259,39 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
-    return
+
+    visited_nodes = {}
+    nodes = Queue.PriorityQueue()
+    start = self.robot.GetActiveDOFValues()
+    nodes.put(start)
+    print 'test'
+    trajectory = np.array([])
+    for g in goals: #for each of the goal states
+            goal_reached = False
+	    while not nodes.empty() and not goal_reached: #while the queue has nodes
+		    currentNode = nodes.get() #pop the next node
+            	    if (currentNode == g).all(): #check if we reached the current goal
+                        goal_reached = True                
+                        continue #jump out of the loop
+
+	            neighbors = self.transition_config(currentNode)
+            
+            	    for c in neighbors:
+                        if not self.convert_for_dict(c) in visited_nodes.keys():
+                            visited_nodes[self.convert_for_dict(c)] = currentNode
+                    	    nodes.put(c)
+            			
+		    print currentNode 
+	    r= currentNode                                                      #Ankit
+            while r is not start:
+                trajectory = np.append(trajectory,r)
+                r = visited_nodes[self.convert_for_dict(r)]
+     	    start = g
+
+    trjaectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+
+    print 'Found goal' + g
+    return trajectory
 
 
   ### TODO ###  
@@ -384,7 +416,8 @@ if __name__ == '__main__':
 	robo = RoboHandler()
 	temp_goal = [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
 	robo.init_transition_arrays()
-	robo.search_to_goal_depthfirst(temp_goal)
+	
+	robo.search_to_goal_breadthfirst(temp_goal)
   #run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
 
