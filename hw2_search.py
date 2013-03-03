@@ -262,43 +262,43 @@ class RoboHandler:
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
 
-    visited_nodes = {}
-    nodes = collections.deque()
-    start = self.robot.GetActiveDOFValues()
-    nodes.append(start)
-    currentNode = start
-    print nodes
-    print 'test'
-    trajectory = np.array([])
-    for g in goals: #for each of the goal states
-        goal_reached = False
-        while not nodes and not goal_reached: #while the queue has nodes
-            currentNode = nodes.popleft() #pop the next node
-            if np.allclose(currentNode,g): #check if we reached the current goal
-                        goal_reached = True                
-                        continue #jump out of the loop
+		visited_nodes = {}
+		nodes = collections.deque()
+		start = self.robot.GetActiveDOFValues()
+		nodes.append(start)
+		currentNode = start
+		print nodes
+		print 'test'
+		trajectory = np.array([])
+		for g in goals: #for each of the goal states
+				goal_reached = False
+				while nodes and not goal_reached: #while the queue has nodes
+						currentNode = nodes.popleft() #pop the next node
+						if np.allclose(currentNode,g): #check if we reached the current goal
+								goal_reached = True                
+								continue #jump out of the loop
 
-            neighbors = self.transition_config(currentNode)
-            
-            for c in neighbors:
-                 if not self.check_collision(c):
-                     if not self.convert_for_dict(c) in visited_nodes.keys():
-                        visited_nodes[self.convert_for_dict(c)] = currentNode
-                        nodes.append(c)
+						neighbors = self.transition_config(currentNode)
+						#print neighbors
+						for c in neighbors:
+								if not self.check_collision(c):
+										if not self.convert_for_dict(c) in visited_nodes.keys():
+												visited_nodes[self.convert_for_dict(c)] = currentNode
+												nodes.append(c)
                         #print c    
             #print currentNode 
-		#r = currentNode
+		r = currentNode
 		
-		while r is not start
-    	trajectory = np.append(trajectory,r)
-    	r = visited_nodes[self.convert_for_dict(r)]
-    start = g
-    nodes = collections.deque()
-    nodes.append(start)
-    trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+		while r is not start:
+				trajectory = np.append(trajectory,r)
+				r = visited_nodes[self.convert_for_dict(r)]
+		start = g
+		nodes = collections.deque()
+		nodes.append(start)
+		trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
-    print trajectory
-    return trajectory
+		print trajectory
+		return trajectory
 
 
   ### TODO ###  
@@ -378,7 +378,7 @@ class RoboHandler:
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
-
+    #print new_configs
     return new_configs
 
 
