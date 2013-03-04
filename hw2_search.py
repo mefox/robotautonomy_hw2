@@ -164,7 +164,6 @@ class RoboHandler:
        [ 1.65311863, -1.17157253,  0.4       ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
        [ 1.59512823, -1.07309638,  0.5       ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
        [ 1.67038884, -1.16082512,  0.4       ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
- 
     with self.env:
       self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
 
@@ -489,7 +488,7 @@ class RoboHandler:
   #######################################################
   def min_euclid_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
-    
+	
     return 0, goals[0]
 
 
@@ -501,8 +500,16 @@ class RoboHandler:
   #######################################################
   def min_manhattan_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
-    return 0, goals[0]
-    
+    goals1 = np.array([])
+    for g in goals:
+    	man =np.sum(abs(g-config)) 
+	goals1 = np.append(goals1, np.append(g,man))
+    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))
+    goals1 = np.sort(goals1)
+    goals1 = goals1[::-1]
+    g = goals1[0]
+    return g[7], g[:7]
+     
   
 
 
@@ -527,5 +534,6 @@ if __name__ == '__main__':
     #robo.init_transition_arrays()
     #robo.search_to_goal_depthfirst(temp_goal)
     #robo.search_to_goal_breadthfirst(temp_goal)
-    robo.run_simple_problem() #runs the simple problem
+    #robo.run_simple_problem() #runs the simple problem
+    robo.run_difficult_problem()
     time.sleep(10000) #to keep the openrave window open
