@@ -138,8 +138,10 @@ class RoboHandler:
     self.robot.GetController().SetPath(traj)
     self.robot.WaitForController(0)
     self.taskmanip.CloseFingers()
-
-
+    
+#    with self.env:
+##        self.robot.SetActiveDOFValues([0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746])
+#         self.robot.SetActiveDOFValues(self.start)
   #######################################################
   # Harder search problem - uses A* algorithm
   #######################################################
@@ -375,9 +377,10 @@ class RoboHandler:
         nodes = collections.deque()
         nodes.append(start)
         trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
-    
+        trajectory[0]= [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+        trajectory = trajectory[::-1]
         print "trajectory", trajectory
-	traj = self.points_to_traj(trajectory)
+        traj = self.points_to_traj(trajectory)
         return traj
 ###########################################################################################################
   ### TODO ###  
