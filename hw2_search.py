@@ -118,15 +118,16 @@ class RoboHandler:
     
     self.init_transition_arrays()
     #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
-    goal = [ 1.33, -1.10, -0.3, 2.37,-0.23, -1.29, -2.23]
+    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+    goal = [ 1.43, -1.20, -0.3, 2.37,-0.23, -1.29, -2.23]
     with self.env:
-      self.robot.SetActiveDOFValues([ 1.23, -1.10, -0.3,  2.37, -0.23, -1.29, -2.23])
+      self.robot.SetActiveDOFValues(self.start)
 
     # get the trajectory!
     traj = self.search_to_goal_breadthfirst([goal])
 
     with self.env:
-      self.robot.SetActiveDOFValues([ 1.23, -1.10, -0.3,  2.37, -0.23, -1.29, -2.23])
+      self.robot.SetActiveDOFValues(self.start)
 
     
     self.robot.GetController().SetPath(traj)
@@ -262,12 +263,16 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
-		
+		print self.start
+		start = np.array(self.start)
 		visited_nodes = {}
 		nodes = collections.deque()
-		start = self.robot.GetActiveDOFValues()
+		#start = np.array(self.robot.GetActiveDOFValues())
+		#start = [1.23, -1.11, -0.30, 2.37, -0.23, -1.29, -2.23]
+		print "start:", start
 		nodes.append(start)
 		visited_nodes[self.convert_for_dict(start)] = None
+		print "visited_node: start: ", visited_nodes
 		currentNode = start
 		print nodes
 		print 'test'
@@ -276,11 +281,11 @@ class RoboHandler:
 				goal_reached = False
 				while nodes and not goal_reached: #while the queue has nodes
 						currentNode = nodes.popleft() #pop the next node
-						print currentNode-g						#to check distance from goal
+						print "distance to goal", (currentNode-g)						#to check distance from goal
 						
 						if (currentNode-g).all()<1: #check if we reached the current goal
 								goal_reached = True                
-								print goal_reached
+								print "Goal Reached?",goal_reached
 								continue #jump out of the loop
 
 						neighbors = self.transition_config(currentNode)
@@ -291,18 +296,20 @@ class RoboHandler:
 												visited_nodes[self.convert_for_dict(c)] = currentNode
 												nodes.append(c)
                         #print c    
-            #print currentNode 
-				print visited_nodes
+            #print currentNode
+				visited_nodes[self.convert_for_dict(g)] = currentNode 
+				print "visited_nodes:", visited_nodes
 				r = g 
 				while r is not start:
 						trajectory = np.append(trajectory,r)
 						r = visited_nodes[self.convert_for_dict(r)]
+				trajectory = np.append(trajectory,r)
 				start = g
 				nodes = collections.deque()
 				nodes.append(start)
 		trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
-		print trajectory
+		print "trajectory", trajectory
 		return trajectory
 
 
@@ -347,7 +354,7 @@ class RoboHandler:
   # Convert to and from numpy array to a hashable function
   #######################################################
   def convert_for_dict(self, item):
-    item = np.array(item)*100
+    item = np.array(item)*100.
     return tuple(item.astype(int))
     #return tuple(item)
 
