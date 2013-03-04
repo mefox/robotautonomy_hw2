@@ -116,8 +116,9 @@ class RoboHandler:
       self.robot.SetDOFValues(self.grasps[0][self.graspindices['igrasppreshape']], self.manip.GetGripperIndices()) # move to preshape
     
     
-    self.self.tnit_transition_arrays()
-    goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+    self.init_transition_arrays()
+    #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+    goal = [ 1.33, -1.10, -0.3, 2.37,-0.23, -1.29, -2.23]
     with self.env:
       self.robot.SetActiveDOFValues([ 1.23, -1.10, -0.3,  2.37, -0.23, -1.29, -2.23])
 
@@ -239,7 +240,7 @@ class RoboHandler:
                             visited_nodes[self.convert_for_dict(c)] = currentNode
                             nodes.put(c)
                     print np.size(c)        
-             
+            	     
         r= currentNode                                                      #Ankit
         while r is not start:
                 trajectory = np.append(trajectory,r)
@@ -261,11 +262,12 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
-
+		
 		visited_nodes = {}
 		nodes = collections.deque()
 		start = self.robot.GetActiveDOFValues()
 		nodes.append(start)
+		visited_nodes[self.convert_for_dict(start)] = None
 		currentNode = start
 		print nodes
 		print 'test'
@@ -274,27 +276,30 @@ class RoboHandler:
 				goal_reached = False
 				while nodes and not goal_reached: #while the queue has nodes
 						currentNode = nodes.popleft() #pop the next node
-						if np.allclose(currentNode,g): #check if we reached the current goal
+						print currentNode-g						#to check distance from goal
+						
+						if (currentNode-g).all()<1: #check if we reached the current goal
 								goal_reached = True                
+								print goal_reached
 								continue #jump out of the loop
 
 						neighbors = self.transition_config(currentNode)
 						#print neighbors
 						for c in neighbors:
-								if not self.check_collision(c):
+								#if not self.check_collision(c):
 										if not self.convert_for_dict(c) in visited_nodes.keys():
 												visited_nodes[self.convert_for_dict(c)] = currentNode
 												nodes.append(c)
                         #print c    
             #print currentNode 
-		r = currentNode
-		
-		while r is not start:
-				trajectory = np.append(trajectory,r)
-				r = visited_nodes[self.convert_for_dict(r)]
-		start = g
-		nodes = collections.deque()
-		nodes.append(start)
+				print visited_nodes
+				r = g 
+				while r is not start:
+						trajectory = np.append(trajectory,r)
+						r = visited_nodes[self.convert_for_dict(r)]
+				start = g
+				nodes = collections.deque()
+				nodes.append(start)
 		trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
 		print trajectory
@@ -342,10 +347,13 @@ class RoboHandler:
   # Convert to and from numpy array to a hashable function
   #######################################################
   def convert_for_dict(self, item):
-    return tuple(np.int_(item*100))
+    item = np.array(item)*100
+    return tuple(item.astype(int))
     #return tuple(item)
 
   def convert_from_dictkey(self, item):
+    print "convert_from dictkey"
+    print np.array(item)/100.
     return np.array(item)/100.
     #return np.array(item)
 
@@ -404,6 +412,7 @@ class RoboHandler:
   #######################################################
   def min_euclid_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
+    
     return 0, goals[0]
 
 
@@ -437,8 +446,9 @@ class RoboHandler:
 if __name__ == '__main__':
     robo = RoboHandler()
     temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
-    robo.init_transition_arrays()
+    
+    #robo.init_transition_arrays()
     #robo.search_to_goal_depthfirst(temp_goal)
-    robo.search_to_goal_breadthfirst(temp_goal)
-  #run_simple_problem() #runs the simple problem
+    #robo.search_to_goal_breadthfirst(temp_goal)
+    robo.run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
