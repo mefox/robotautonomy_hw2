@@ -121,10 +121,10 @@ class RoboHandler:
        
 #    goal = self.convert_for_dict(goal)
 #    goal = self.convert_from_dictkey(goal)
-#    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
-    self.start = [1.2, -1.10, -0.3, 2.3, -0.2, -1.2, -2.2]
-    goal = [ 0.9, -1.1, -0.2,  2.2, -0.2, -1.0, -2.2] 
-# goal = [ 1.4, -1.30, -0.2, 2.3,-0.2, -1.2, -2.2]
+    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+#    self.start = [1.2, -1.10, -0.3, 2.3, -0.2, -1.2, -2.2]
+    goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23] 
+#    goal = [ 1.4, -1.30, -0.3, 2.3,-0.2, -1.2, -2.2]
     with self.env:
       self.robot.SetActiveDOFValues(self.start)
 
@@ -354,12 +354,13 @@ class RoboHandler:
 #        print 'visited nodes : ', visited_nodes
 #        parents[self.convert_for_dict(g)] = currentNode 
 #        print "parents:", parents
-        r = np.array(g) 
+        
+        r = currentNode 
         print "r", r
         print 'start', start
         print len(parents)
         print len(visited_nodes)
-        a1 = parents[self.convert_for_dict(g)]
+        a1 = parents[self.convert_for_dict(r)]
         a2 = parents[self.convert_for_dict(a1)]
         a3 = parents[self.convert_for_dict(a2)]
         print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
