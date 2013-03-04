@@ -117,9 +117,11 @@ class RoboHandler:
     
     
     self.init_transition_arrays()
-    #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+    #goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
+	goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+
     self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
-    goal = [ 1.43, -1.20, -0.3, 2.37,-0.23, -1.29, -2.23]
+    #goal = [ 1.43, -1.30, -0.3, 2.37,-0.23, -1.29, -2.23]
     with self.env:
       self.robot.SetActiveDOFValues(self.start)
 
@@ -130,9 +132,9 @@ class RoboHandler:
       self.robot.SetActiveDOFValues(self.start)
 
     
-    #self.robot.GetController().SetPath(traj)
-    #self.robot.WaitForController(0)
-    #self.taskmanip.CloseFingers()
+    self.robot.GetController().SetPath(traj)
+    self.robot.WaitForController(0)
+    self.taskmanip.CloseFingers()
 
 
   #######################################################
@@ -332,11 +334,11 @@ class RoboHandler:
                 print"Current Node at goal reached", currentNode
                 print"G at goal reached", g
                 continue #jump out of the loop
-            print 'curent node:', currentNode
+            #print 'curent node:', currentNode
             neighbors = self.transition_config(currentNode)
-            print "neighbors:",  neighbors
+            #print "neighbors:",  neighbors
             for c in neighbors:
-                                #if not self.check_collision(c):
+                 #if not self.check_collision(c)
 #                print 'c:', c
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
 #                    if c not in 
@@ -349,29 +351,35 @@ class RoboHandler:
 #        print 'visited nodes : ', visited_nodes
 #        parents[self.convert_for_dict(g)] = currentNode 
 #        print "parents:", parents
-        r = np.array(g) 
+        r = currentNode 
         print "r", r
         print 'start', start
         print len(parents)
         print len(visited_nodes)
-        a1 = parents[self.convert_for_dict(g)]
-        a2 = parents[self.convert_for_dict(a1)]
-        a3 = parents[self.convert_for_dict(a2)]
-        print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
+        #a1 = parents[self.convert_for_dict(g)]
+        #a2 = parents[self.convert_for_dict(a1)]
+        #a3 = parents[self.convert_for_dict(a2)]
+        #print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
         while r is not start:
+            print 'we are inside trajectory reconstruction'
             trajectory = np.append(trajectory,r)
             a = trajectory[0]
             b = trajectory [1]
             c = trajectory [2]
+            print 'Key is here ', self.convert_for_dict(r) in parents
             r = parents[self.convert_for_dict(r)]
 #            print r
         trajectory = np.append(trajectory,r)
-        nodes = collections.deque()
+        
+        nodes = collections.deque() #clear the queue for the next goal
         nodes.append(start)
         trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
-    
+    	trajectory = trajectory[::-1]
         print "trajectory", trajectory
+
+        trajectory = self.points_to_traj(trajectory)
         return trajectory
+
 ###########################################################################################################
   ### TODO ###  
   #######################################################
@@ -491,6 +499,7 @@ class RoboHandler:
   #######################################################
   def min_manhattan_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
+	
     return 0, goals[0]
     
   
@@ -518,4 +527,4 @@ if __name__ == '__main__':
     #robo.search_to_goal_depthfirst(temp_goal)
     #robo.search_to_goal_breadthfirst(temp_goal)
     robo.run_simple_problem() #runs the simple problem
-  #time.sleep(10000) #to keep the openrave window open
+    time.sleep(10000) #to keep the openrave window open
