@@ -263,57 +263,116 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
-        print self.start
+#        print self.start
         start = np.array(self.start)
-        visited_nodes = {}
+        parents = {}
+        visited_nodes=set([])
         nodes = collections.deque()
         #start = np.array(self.robot.GetActiveDOFValues())
         #start = [1.23, -1.11, -0.30, 2.37, -0.23, -1.29, -2.23]
         print "start:", start
+        parents[self.convert_for_dict(start)] = None
+        print "parents: start: ", parents
+        
+        visited_nodes.add(self.convert_for_dict(start))
+        print "visited_node:", visited_nodes
+        
         nodes.append(start)
-        visited_nodes[self.convert_for_dict(start)] = None
-        print "visited_node: start: ", visited_nodes
         currentNode = start
         print "Nodes before main loop:", nodes
         print 'test'
+        
+        
         trajectory = np.array([])
-        for g in goals: #for each of the goal states
-                goal_reached = False
-                while nodes and not goal_reached: #while the queue has nodes
-                        currentNode = nodes.popleft() #pop the next node
-                        print "distance to goal:", (currentNode-g)        #to check distance from goal
-                        if np.allclose(currentNode,g): #check if we reached the current goal
-                                goal_reached = True    
-                                print "Goal Reached?",goal_reached
-                                continue #jump out of the loop
-
-                        neighbors = self.transition_config(currentNode)
-                        #print "neighbors:",  neighbors
-                        for c in neighbors:
+#        for g in goals: #for each of the goal states
+#                goal_reached = False
+#                while nodes and not goal_reached: #while the queue has nodes
+#                        currentNode = nodes.popleft() #pop the next node
+#                        print "distance to goal:", (currentNode-g)        #to check distance from goal
+#                        if np.allclose(currentNode,g): #check if we reached the current goal
+#                                goal_reached = True    
+#                                print "Goal Reached?",goal_reached
+#                                continue #jump out of the loop
+#
+#                        neighbors = self.transition_config(currentNode)
+#                        #print "neighbors:",  neighbors
+#                        for c in neighbors:
+#                                #if not self.check_collision(c):
+#                                if not self.convert_for_dict(c) in parents.keys():    
+#                                                
+#                                    parents[self.convert_for_dict(c)] = currentNode
+#                                    nodes.append(c)
+#                        #print c    
+#            #print currentNode
+#                parents[self.convert_for_dict(g)] = currentNode 
+#                print "parents:", parents
+#                r = g 
+#                while r is not start:
+#                        trajectory = np.append(trajectory,r)
+#                        r = parents[self.convert_for_dict(r)]
+#                        print r
+#                trajectory = np.append(trajectory,r)
+#                start = g
+#                nodes = collections.deque()
+#                nodes.append(start)
+#        trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+#
+#        print "trajectory", trajectory
+#        return trajectory
+###################################################################################
+        g=goals[0]
+#        print 'g', g
+        goal_reached = False
+        while nodes and not goal_reached: #while the queue has nodes
+            currentNode = nodes.popleft() #pop the next node
+#            print "distance to goal:", (currentNode-g)        #to check distance from goal
+            if np.allclose(currentNode,g): #check if we reached the current goal
+                goal_reached = True    
+                print "Goal Reached?",goal_reached
+                print"Current Node at goal reached", currentNode
+                print"G at goal reached", g
+                continue #jump out of the loop
+            print 'curent node:', currentNode
+            neighbors = self.transition_config(currentNode)
+            print "neighbors:",  neighbors
+            for c in neighbors:
                                 #if not self.check_collision(c):
-                                if not self.convert_for_dict(c) in visited_nodes.keys():    
-                                                
-                                    visited_nodes[self.convert_for_dict(c)] = currentNode
-                                    nodes.append(c)
+#                print 'c:', c
+                if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
+#                    if c not in 
+                        visited_nodes.add(self.convert_for_dict(c))  
+                        parents[self.convert_for_dict(c)] = currentNode
+                        nodes.append(c)
                         #print c    
             #print currentNode
-                visited_nodes[self.convert_for_dict(g)] = currentNode 
-                print "visited_nodes:", visited_nodes
-                r = g 
-                while r is not start:
-                        trajectory = np.append(trajectory,r)
-                        r = visited_nodes[self.convert_for_dict(r)]
-                        print r
-                trajectory = np.append(trajectory,r)
-                start = g
-                nodes = collections.deque()
-                nodes.append(start)
+#        visited_nodes.add(self.convert_for_dict(g))
+#        print 'visited nodes : ', visited_nodes
+#        parents[self.convert_for_dict(g)] = currentNode 
+#        print "parents:", parents
+        r = np.array(g) 
+        print "r", r
+        print 'start', start
+        print len(parents)
+        print len(visited_nodes)
+        a1 = parents[self.convert_for_dict(g)]
+        a2 = parents[self.convert_for_dict(a1)]
+        a3 = parents[self.convert_for_dict(a2)]
+        print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
+        while r is not start:
+            trajectory = np.append(trajectory,r)
+            a = trajectory[0]
+            b = trajectory [1]
+            c = trajectory [2]
+            r = parents[self.convert_for_dict(r)]
+#            print r
+        trajectory = np.append(trajectory,r)
+        nodes = collections.deque()
+        nodes.append(start)
         trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
-
+    
         print "trajectory", trajectory
         return trajectory
-
-
+###########################################################################################################
   ### TODO ###  
   #######################################################
   # A* SEARCH
