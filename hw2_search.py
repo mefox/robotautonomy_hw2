@@ -117,11 +117,22 @@ class RoboHandler:
     
     
     self.init_transition_arrays()
+<<<<<<< HEAD
     goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
     #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
 
     self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
     #goal = [ 1.43, -1.30, -0.3, 2.37,-0.23, -1.29, -2.23]
+=======
+#    goal = [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+       
+#    goal = self.convert_for_dict(goal)
+#    goal = self.convert_from_dictkey(goal)
+    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+#    self.start = [1.2, -1.10, -0.3, 2.3, -0.2, -1.2, -2.2]
+    goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23] 
+#    goal = [ 1.4, -1.30, -0.3, 2.3,-0.2, -1.2, -2.2]
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
     with self.env:
       self.robot.SetActiveDOFValues(self.start)
 
@@ -135,8 +146,15 @@ class RoboHandler:
     self.robot.GetController().SetPath(traj)
     self.robot.WaitForController(0)
     self.taskmanip.CloseFingers()
+<<<<<<< HEAD
 
 
+=======
+    
+#    with self.env:
+##        self.robot.SetActiveDOFValues([0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746])
+#         self.robot.SetActiveDOFValues(self.start)
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
   #######################################################
   # Harder search problem - uses A* algorithm
   #######################################################
@@ -159,7 +177,7 @@ class RoboHandler:
        [ 1.65311863, -1.17157253,  0.4       ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
        [ 1.59512823, -1.07309638,  0.5       ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
        [ 1.67038884, -1.16082512,  0.4       ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
- 
+    print self.min_manhattan_dist_to_goals([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856],goals)
     with self.env:
       self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
 
@@ -323,7 +341,7 @@ class RoboHandler:
 #        return trajectory
 ###################################################################################
         g=goals[0]
-#        print 'g', g
+        print 'g', g
         goal_reached = False
         while nodes and not goal_reached: #while the queue has nodes
             currentNode = nodes.popleft() #pop the next node
@@ -334,11 +352,19 @@ class RoboHandler:
                 print"Current Node at goal reached", currentNode
                 print"G at goal reached", g
                 continue #jump out of the loop
+<<<<<<< HEAD
             #print 'curent node:', currentNode
             neighbors = self.transition_config(currentNode)
             #print "neighbors:",  neighbors
             for c in neighbors:
                  #if not self.check_collision(c)
+=======
+#            print 'curent node:', currentNode
+            neighbors = self.transition_config(currentNode)
+#            print "neighbors:",  neighbors
+            for c in neighbors:
+#              if not self.check_collision(c):
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
 #                print 'c:', c
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
 #                    if c not in 
@@ -351,22 +377,39 @@ class RoboHandler:
 #        print 'visited nodes : ', visited_nodes
 #        parents[self.convert_for_dict(g)] = currentNode 
 #        print "parents:", parents
+<<<<<<< HEAD
+=======
+        
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
         r = currentNode 
         print "r", r
         print 'start', start
         print len(parents)
         print len(visited_nodes)
+<<<<<<< HEAD
         #a1 = parents[self.convert_for_dict(g)]
         #a2 = parents[self.convert_for_dict(a1)]
         #a3 = parents[self.convert_for_dict(a2)]
         #print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
+=======
+        a1 = parents[self.convert_for_dict(r)]
+        a2 = parents[self.convert_for_dict(a1)]
+        a3 = parents[self.convert_for_dict(a2)]
+        print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
         while r is not start:
             print 'we are inside trajectory reconstruction'
             trajectory = np.append(trajectory,r)
+<<<<<<< HEAD
             a = trajectory[0]
             b = trajectory [1]
             c = trajectory [2]
             print 'Key is here ', self.convert_for_dict(r) in parents
+=======
+#            a = trajectory[0]
+#            b = trajectory [1]
+#            c = trajectory [2]
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
             r = parents[self.convert_for_dict(r)]
 #            print r
         trajectory = np.append(trajectory,r)
@@ -374,12 +417,20 @@ class RoboHandler:
         nodes = collections.deque() #clear the queue for the next goal
         nodes.append(start)
         trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+<<<<<<< HEAD
     	trajectory = trajectory[::-1]
         print "trajectory", trajectory
 
         trajectory = self.points_to_traj(trajectory)
         return trajectory
 
+=======
+        trajectory[0]= [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+        trajectory = trajectory[::-1]
+        print "trajectory", trajectory
+        traj = self.points_to_traj(trajectory)
+        return traj
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
 ###########################################################################################################
   ### TODO ###  
   #######################################################
@@ -487,6 +538,7 @@ class RoboHandler:
   #######################################################
   def min_euclid_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
+<<<<<<< HEAD
     distance = np.array([])
     for g in goals: #for each of the goal states passed
         #print "g is", g
@@ -508,6 +560,17 @@ class RoboHandler:
     #print "sorted is: ", sorted_distance
 	#return distance and shortest goal.
     return smallest, goals[index]
+=======
+    goals1 = np.array([])
+    for g in goals:
+    	eucd = np.linalg.norm(g-config) 
+	goals1 = np.append(goals1, np.append(g,eucd))
+    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))
+    goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
+    print goals1
+    close = goals1[0]
+    return close[-1], close[:7]
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
 
 
   ### TODO ###  (not required but I found it useful)
@@ -518,9 +581,22 @@ class RoboHandler:
   #######################################################
   def min_manhattan_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
+<<<<<<< HEAD
  
     return 0, goals[0]
     
+=======
+    goals1 = np.array([])
+    for g in goals:
+    	man =np.sum(abs(g-config)) 
+	goals1 = np.append(goals1, np.append(g, man))
+    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))
+    goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
+    print goals1
+    close = goals1[0]
+    return close[-1], close[:7]
+     
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
   
 
 
@@ -557,5 +633,10 @@ if __name__ == '__main__':
     #robo.init_transition_arrays()
     #robo.search_to_goal_depthfirst(temp_goal)
     #robo.search_to_goal_breadthfirst(temp_goal)
+<<<<<<< HEAD
     robo.run_simple_problem() #runs the simple problem
+=======
+    #robo.run_simple_problem() #runs the simple problem
+    robo.run_difficult_problem()
+>>>>>>> dd9a5e41e0ce378bebd8963b4f3d5f7b98281b5a
     time.sleep(10000) #to keep the openrave window open

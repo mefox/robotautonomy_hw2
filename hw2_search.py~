@@ -117,15 +117,19 @@ class RoboHandler:
     
     
     self.init_transition_arrays()
-    goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+    goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
+    #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+
+    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+    #goal = [ 1.43, -1.30, -0.3, 2.37,-0.23, -1.29, -2.23]
     with self.env:
-      self.robot.SetActiveDOFValues([ 1.23, -1.10, -0.3,  2.37, -0.23, -1.29, -2.23])
+      self.robot.SetActiveDOFValues(self.start)
 
     # get the trajectory!
     traj = self.search_to_goal_breadthfirst([goal])
 
     with self.env:
-      self.robot.SetActiveDOFValues([ 1.23, -1.10, -0.3,  2.37, -0.23, -1.29, -2.23])
+      self.robot.SetActiveDOFValues(self.start)
 
     
     self.robot.GetController().SetPath(traj)
@@ -220,27 +224,38 @@ class RoboHandler:
   def search_to_goal_depthfirst(self, goals):
     visited_nodes = {}
     nodes = Queue.LifoQueue()
-	nodes.put(self.robot.GetActiveDOFValues())
-	print 'test'
-
+    start = self.robot.GetActiveDOFValues()
+    nodes.put(start)
+    print 'test'
+    trajectory = np.array([])
     for g in goals: #for each of the goal states
         goal_reached = False
-	    while not nodes.empty() and not goal_reached: #while the queue has nodes
-		    currentNode = nodes.get() #pop the next node
-            if currentNode == g: #check if we reached the current goal
+        while not nodes.empty() and not goal_reached: #while the queue has nodes
+            currentNode = nodes.get() #pop the next node
+            if np.allclose(currentNode,g): #check if we reached the current goal
                 goal_reached = True                
                 continue #jump out of the loop
 
-		    neighbors = transition_config(currentNode)
+                neighbors = self.transition_config(currentNode)
             
-            for c in neighbors:
-                if not c in visited_nodes:
-                    visited_nodes[c] = currentNode
-                    nodes.put(c)
-            
-		    print currentNode
-        print 'Found goal' + g
-	return 0
+                for c in neighbors:
+                    if not self.convert_for_dict(c) in visited_nodes.keys():
+                            visited_nodes[self.convert_for_dict(c)] = currentNode
+                            nodes.put(c)
+                    print np.size(c)        
+                     
+        r= currentNode                                                      #Ankit
+        while r is not start:
+                trajectory = np.append(trajectory,r)
+                r = visited_nodes[self.convert_for_dict(r)]
+        start = g
+        
+        #nodes.queue.clear()
+        nodes.put(start)
+    trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+
+    print 'Found goal' + g
+    return trajectory                                                           #Ankit #~Ankit
 
   ### TODO ###  
   #######################################################
@@ -250,9 +265,122 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
-    return
+#        print self.start
+        start = np.array(self.start)
+        parents = {}
+        visited_nodes=set([])
+        nodes = collections.deque()
+        #start = np.array(self.robot.GetActiveDOFValues())
+        #start = [1.23, -1.11, -0.30, 2.37, -0.23, -1.29, -2.23]
+        print "start:", start
+        parents[self.convert_for_dict(start)] = None
+        print "parents: start: ", parents
+        
+        visited_nodes.add(self.convert_for_dict(start))
+        print "visited_node:", visited_nodes
+        
+        nodes.append(start)
+        currentNode = start
+        print "Nodes before main loop:", nodes
+        print 'test'
+        
+        
+        trajectory = np.array([])
+#        for g in goals: #for each of the goal states
+#                goal_reached = False
+#                while nodes and not goal_reached: #while the queue has nodes
+#                        currentNode = nodes.popleft() #pop the next node
+#                        print "distance to goal:", (currentNode-g)        #to check distance from goal
+#                        if np.allclose(currentNode,g): #check if we reached the current goal
+#                                goal_reached = True    
+#                                print "Goal Reached?",goal_reached
+#                                continue #jump out of the loop
+#
+#                        neighbors = self.transition_config(currentNode)
+#                        #print "neighbors:",  neighbors
+#                        for c in neighbors:
+#                                #if not self.check_collision(c):
+#                                if not self.convert_for_dict(c) in parents.keys():    
+#                                                
+#                                    parents[self.convert_for_dict(c)] = currentNode
+#                                    nodes.append(c)
+#                        #print c    
+#            #print currentNode
+#                parents[self.convert_for_dict(g)] = currentNode 
+#                print "parents:", parents
+#                r = g 
+#                while r is not start:
+#                        trajectory = np.append(trajectory,r)
+#                        r = parents[self.convert_for_dict(r)]
+#                        print r
+#                trajectory = np.append(trajectory,r)
+#                start = g
+#                nodes = collections.deque()
+#                nodes.append(start)
+#        trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+#
+#        print "trajectory", trajectory
+#        return trajectory
+###################################################################################
+        g=goals[0]
+#        print 'g', g
+        goal_reached = False
+        while nodes and not goal_reached: #while the queue has nodes
+            currentNode = nodes.popleft() #pop the next node
+#            print "distance to goal:", (currentNode-g)        #to check distance from goal
+            if np.allclose(currentNode,g): #check if we reached the current goal
+                goal_reached = True    
+                print "Goal Reached?",goal_reached
+                print"Current Node at goal reached", currentNode
+                print"G at goal reached", g
+                continue #jump out of the loop
+            #print 'curent node:', currentNode
+            neighbors = self.transition_config(currentNode)
+            #print "neighbors:",  neighbors
+            for c in neighbors:
+                 #if not self.check_collision(c)
+#                print 'c:', c
+                if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
+#                    if c not in 
+                        visited_nodes.add(self.convert_for_dict(c))  #add the neighbor to the list of visited
+                        parents[self.convert_for_dict(c)] = currentNode #set the parent of the neighbor to be the popped node
+                        nodes.append(c)
+                        #print c    
+            #print currentNode
+#        visited_nodes.add(self.convert_for_dict(g))
+#        print 'visited nodes : ', visited_nodes
+#        parents[self.convert_for_dict(g)] = currentNode 
+#        print "parents:", parents
+        r = currentNode 
+        print "r", r
+        print 'start', start
+        print len(parents)
+        print len(visited_nodes)
+        #a1 = parents[self.convert_for_dict(g)]
+        #a2 = parents[self.convert_for_dict(a1)]
+        #a3 = parents[self.convert_for_dict(a2)]
+        #print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
+        while r is not start:
+            print 'we are inside trajectory reconstruction'
+            trajectory = np.append(trajectory,r)
+            a = trajectory[0]
+            b = trajectory [1]
+            c = trajectory [2]
+            print 'Key is here ', self.convert_for_dict(r) in parents
+            r = parents[self.convert_for_dict(r)]
+#            print r
+        trajectory = np.append(trajectory,r)
+        
+        nodes = collections.deque() #clear the queue for the next goal
+        nodes.append(start)
+        trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+    	trajectory = trajectory[::-1]
+        print "trajectory", trajectory
 
+        trajectory = self.points_to_traj(trajectory)
+        return trajectory
 
+###########################################################################################################
   ### TODO ###  
   #######################################################
   # A* SEARCH
@@ -263,6 +391,21 @@ class RoboHandler:
   def search_to_goal_astar(self, goals):
     return
 
+
+
+
+
+###################################################
+#  Collision Check
+###################################################
+  def check_collision(self, DOFs):
+    current_DOFs = self.robot.GetActiveDOFValues()
+    with self.env:
+        self.robot.SetActiveDOFValues(DOFs)
+        collision1 = self.env.CheckCollision(self.robot) 
+        collision2 = self.robot.CheckSelfCollision()
+        self.robot.SetActiveDOFValues(current_DOFs)
+    return collision1 or collision2
 
   ### TODO ###  (not required but I found it useful)
   #######################################################
@@ -279,10 +422,13 @@ class RoboHandler:
   # Convert to and from numpy array to a hashable function
   #######################################################
   def convert_for_dict(self, item):
-    return tuple(np.int_(item*100))
+    item = np.array(item)*100.
+    return tuple(item.astype(int))
     #return tuple(item)
 
   def convert_from_dictkey(self, item):
+    print "convert_from dictkey"
+    print np.array(item)/100.
     return np.array(item)/100.
     #return np.array(item)
 
@@ -296,12 +442,12 @@ class RoboHandler:
   #######################################################
   def init_transition_arrays(self):
 #######  SSR  #####
-	positive_transition = np.identity(7)*TRANS_PER_DIR;
-	negative_transition= positive_transition*-1;
-	self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
+    positive_transition = np.identity(7)*TRANS_PER_DIR;
+    negative_transition= positive_transition*-1;
+    self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
 
     #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
-    return
+    return 
 
 
   ### TODO ###  (not required but I found it useful)
@@ -315,7 +461,7 @@ class RoboHandler:
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
-
+    #print new_configs
     return new_configs
 
 
@@ -341,7 +487,27 @@ class RoboHandler:
   #######################################################
   def min_euclid_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
-    return 0, goals[0]
+    distance = np.array([])
+    for g in goals: #for each of the goal states passed
+        #print "g is", g
+        print "difference is", (np.array(g) - np.array(config))
+        euclid_dist = np.linalg.norm(np.array(g) - np.array(config)) #returns the absolute value of the euclidean distance
+        distance = np.append(distance,euclid_dist) #built up a numpy array of distances
+        print "the distance(s) are:", distance
+    
+    #Fine out which goal is the closest and what distance that is
+    index = 0
+    smallest = distance[index]
+    for i in range(6):
+        if distance[i] > distance[i+1]:
+            smallest = distance[i+1]
+            index = i+1 # store the goal index
+
+    print "the shortest distance is: ", smallest
+    print "the closest goal is: ", goals[index]
+    #print "sorted is: ", sorted_distance
+	#return distance and shortest goal.
+    return sorted_distance[0], goals[0]
 
 
   ### TODO ###  (not required but I found it useful)
@@ -352,6 +518,7 @@ class RoboHandler:
   #######################################################
   def min_manhattan_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
+ 
     return 0, goals[0]
     
   
@@ -372,14 +539,23 @@ class RoboHandler:
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-	robo = RoboHandler()
-	temp_goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
-	robo.search_to_goal_depthfirst(temp_goal)
-  #run_simple_problem() #runs the simple problem
-  #time.sleep(10000) #to keep the openrave window open
-=======
-  robo = RoboHandler()
-  time.sleep(10000) #to keep the openrave window open
->>>>>>> b61bd987a482bfda61043bf22e648e6d945183c7
-  
+    robo = RoboHandler()
+    #temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
+    temp_goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
+    start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+
+    goals = np.array([[ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746],
+       [ 1.38238176, -1.05017481,  0.        ,  1.26568204,  0.15001448,  1.32813949, -0.06022621],
+       [ 1.16466262, -1.02175153, -0.3       ,  1.26568204, -2.62343746, -1.43813577, -0.37988181],
+       [ 3.45957137, -0.48619817,  0.        ,  2.0702298 , -1.12033301, -1.33241556,  1.85646563],
+       [ 1.65311863, -1.17157253,  0.4       ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
+       [ 1.59512823, -1.07309638,  0.5       ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
+       [ 1.67038884, -1.16082512,  0.4       ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
+
+    test = robo.min_euclid_dist_to_goals(start,goals)
+    print 'The euclid distance from the start to the temp is',test
+    #robo.init_transition_arrays()
+    #robo.search_to_goal_depthfirst(temp_goal)
+    #robo.search_to_goal_breadthfirst(temp_goal)
+    robo.run_simple_problem() #runs the simple problem
+    time.sleep(10000) #to keep the openrave window open
