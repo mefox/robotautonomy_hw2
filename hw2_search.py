@@ -340,8 +340,8 @@ class RoboHandler:
 #                print 'c:', c
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
 #                    if c not in 
-                        visited_nodes.add(self.convert_for_dict(c))  
-                        parents[self.convert_for_dict(c)] = currentNode
+                        visited_nodes.add(self.convert_for_dict(c))  #add the neighbor to the list of visited
+                        parents[self.convert_for_dict(c)] = currentNode #set the parent of the neighbor to be the popped node
                         nodes.append(c)
                         #print c    
             #print currentNode
