@@ -29,10 +29,10 @@ openrave_data_path = os.getenv('OPENRAVE_DATA', '')
 openrave_data_paths = openrave_data_path.split(':')
 if ordata_path_thispack not in openrave_data_paths:
   if openrave_data_path == '':
-      os.environ['OPENRAVE_DATA'] = ordata_path_thispack
+	  os.environ['OPENRAVE_DATA'] = ordata_path_thispack
   else:
-      datastr = str('%s:%s'%(ordata_path_thispack, openrave_data_path))
-      os.environ['OPENRAVE_DATA'] = datastr
+	  datastr = str('%s:%s'%(ordata_path_thispack, openrave_data_path))
+	  os.environ['OPENRAVE_DATA'] = datastr
 
 #set database file to be in this folder only
 relative_ordatabase = '/database'
@@ -50,8 +50,8 @@ TRANS_PER_DIR = 0.1
 
 class RoboHandler:
   def __init__(self):
-    self.openrave_init()
-    self.problem_init()
+	self.openrave_init()
+	self.problem_init()
 
 
 
@@ -59,117 +59,117 @@ class RoboHandler:
   # the usual initialization for openrave
   #######################################################
   def openrave_init(self):
-    self.env = openravepy.Environment()
-    self.env.SetViewer('qtcoin')
-    self.env.GetViewer().SetName('HW2 Viewer')
-    self.env.Load('models/%s.env.xml' %PACKAGE_NAME)
-    # time.sleep(3) # wait for viewer to initialize. May be helpful to uncomment
-    self.robot = self.env.GetRobots()[0]
+	self.env = openravepy.Environment()
+	self.env.SetViewer('qtcoin')
+	self.env.GetViewer().SetName('HW2 Viewer')
+	self.env.Load('models/%s.env.xml' %PACKAGE_NAME)
+	# time.sleep(3) # wait for viewer to initialize. May be helpful to uncomment
+	self.robot = self.env.GetRobots()[0]
 
-    #set right wam as active manipulator
-    with self.env:
-      self.robot.SetActiveManipulator('right_wam');
-      self.manip = self.robot.GetActiveManipulator()
+	#set right wam as active manipulator
+	with self.env:
+	  self.robot.SetActiveManipulator('right_wam');
+	  self.manip = self.robot.GetActiveManipulator()
 
-      #set active indices to be right arm only
-      self.robot.SetActiveDOFs(self.manip.GetArmIndices() )
-      self.end_effector = self.manip.GetEndEffector()
+	  #set active indices to be right arm only
+	  self.robot.SetActiveDOFs(self.manip.GetArmIndices() )
+	  self.end_effector = self.manip.GetEndEffector()
 
   #######################################################
   # problem specific initialization
   #######################################################
   def problem_init(self):
-    self.target_kinbody = self.env.GetKinBody("target")
+	self.target_kinbody = self.env.GetKinBody("target")
 
-    # create a grasping module
-    self.gmodel = openravepy.databases.grasping.GraspingModel(self.robot, self.target_kinbody)
-    
-    # load grasps
-    if not self.gmodel.load():
-      self.gmodel.autogenerate()
+	# create a grasping module
+	self.gmodel = openravepy.databases.grasping.GraspingModel(self.robot, self.target_kinbody)
+	
+	# load grasps
+	if not self.gmodel.load():
+	  self.gmodel.autogenerate()
 
-    self.grasps = self.gmodel.grasps
-    self.graspindices = self.gmodel.graspindices
+	self.grasps = self.gmodel.grasps
+	self.graspindices = self.gmodel.graspindices
 
-    # load ikmodel
-    self.ikmodel = openravepy.databases.inversekinematics.InverseKinematicsModel(self.robot,iktype=openravepy.IkParameterization.Type.Transform6D)
-    if not self.ikmodel.load():
-      self.ikmodel.autogenerate()
+	# load ikmodel
+	self.ikmodel = openravepy.databases.inversekinematics.InverseKinematicsModel(self.robot,iktype=openravepy.IkParameterization.Type.Transform6D)
+	if not self.ikmodel.load():
+	  self.ikmodel.autogenerate()
 
-    # create taskmanip
-    self.taskmanip = openravepy.interfaces.TaskManipulation(self.robot)
+	# create taskmanip
+	self.taskmanip = openravepy.interfaces.TaskManipulation(self.robot)
   
-    # move left arm out of way
-    self.robot.SetDOFValues(np.array([4,2,0,-1,0,0,0]),self.robot.GetManipulator('left_wam').GetArmIndices() )
+	# move left arm out of way
+	self.robot.SetDOFValues(np.array([4,2,0,-1,0,0,0]),self.robot.GetManipulator('left_wam').GetArmIndices() )
 
 
   #######################################################
   # Simpler search problem - uses breadth first search algorithm
   #######################################################
   def run_simple_problem(self):
-    self.robot.GetController().Reset()
+	self.robot.GetController().Reset()
 
-    # move hand to preshape of grasp
-    # --- important --
-    # I noted they were all the same, otherwise you would need to do this separately for each grasp!
-    with self.env:
-      self.robot.SetDOFValues(self.grasps[0][self.graspindices['igrasppreshape']], self.manip.GetGripperIndices()) # move to preshape
-    
-    
-    self.init_transition_arrays()
-    #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
-    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
-    goal = [ 1.43, -1.20, -0.3, 2.37,-0.23, -1.29, -2.23]
-    with self.env:
-      self.robot.SetActiveDOFValues(self.start)
+	# move hand to preshape of grasp
+	# --- important --
+	# I noted they were all the same, otherwise you would need to do this separately for each grasp!
+	with self.env:
+	  self.robot.SetDOFValues(self.grasps[0][self.graspindices['igrasppreshape']], self.manip.GetGripperIndices()) # move to preshape
+	
+	
+	self.init_transition_arrays()
+	#goal = [ 0.93422058, -1.10221021, -0.2	   ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+	self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+	goal = [ 1.43, -1.20, -0.3, 2.37,-0.23, -1.29, -2.23]
+	with self.env:
+	  self.robot.SetActiveDOFValues(self.start)
 
-    # get the trajectory!
-    traj = self.search_to_goal_breadthfirst([goal])
+	# get the trajectory!
+	traj = self.search_to_goal_breadthfirst([goal])
 
-    with self.env:
-      self.robot.SetActiveDOFValues(self.start)
+	with self.env:
+	  self.robot.SetActiveDOFValues(self.start)
 
-    
-    self.robot.GetController().SetPath(traj)
-    self.robot.WaitForController(0)
-    self.taskmanip.CloseFingers()
+	
+	self.robot.GetController().SetPath(traj)
+	self.robot.WaitForController(0)
+	self.taskmanip.CloseFingers()
 
 
   #######################################################
   # Harder search problem - uses A* algorithm
   #######################################################
   def run_difficult_problem(self):
-    self.robot.GetController().Reset()
+	self.robot.GetController().Reset()
 
-    # move hand to preshape of grasp
-    # --- important --
-    # I noted they were all the same, otherwise you would need to do this separately for each grasp!
-    with self.env:
-      self.robot.SetDOFValues(self.grasps[0][self.graspindices['igrasppreshape']], self.manip.GetGripperIndices()) # move to preshape
-    
+	# move hand to preshape of grasp
+	# --- important --
+	# I noted they were all the same, otherwise you would need to do this separately for each grasp!
+	with self.env:
+	  self.robot.SetDOFValues(self.grasps[0][self.graspindices['igrasppreshape']], self.manip.GetGripperIndices()) # move to preshape
+	
 
-    self.init_transition_arrays()
-    #goals = self.get_goal_dofs(7,1)
-    goals = np.array([[ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746],
-       [ 1.38238176, -1.05017481,  0.        ,  1.26568204,  0.15001448,  1.32813949, -0.06022621],
-       [ 1.16466262, -1.02175153, -0.3       ,  1.26568204, -2.62343746, -1.43813577, -0.37988181],
-       [ 3.45957137, -0.48619817,  0.        ,  2.0702298 , -1.12033301, -1.33241556,  1.85646563],
-       [ 1.65311863, -1.17157253,  0.4       ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
-       [ 1.59512823, -1.07309638,  0.5       ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
-       [ 1.67038884, -1.16082512,  0.4       ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
+	self.init_transition_arrays()
+	#goals = self.get_goal_dofs(7,1)
+	goals = np.array([[ 0.93422058, -1.10221021, -0.2	   ,  2.27275587, -0.22977831, -1.09393251, -2.23921746],
+	   [ 1.38238176, -1.05017481,  0.		,  1.26568204,  0.15001448,  1.32813949, -0.06022621],
+	   [ 1.16466262, -1.02175153, -0.3	   ,  1.26568204, -2.62343746, -1.43813577, -0.37988181],
+	   [ 3.45957137, -0.48619817,  0.		,  2.0702298 , -1.12033301, -1.33241556,  1.85646563],
+	   [ 1.65311863, -1.17157253,  0.4	   ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
+	   [ 1.59512823, -1.07309638,  0.5	   ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
+	   [ 1.67038884, -1.16082512,  0.4	   ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
  
-    with self.env:
-      self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
+	with self.env:
+	  self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
 
-    # get the trajectory!
-    traj = self.search_to_goal_astar(goals)
+	# get the trajectory!
+	traj = self.search_to_goal_astar(goals)
 
-    with self.env:
-      self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
-    
-    self.robot.GetController().SetPath(traj)
-    self.robot.WaitForController(0)
-    self.taskmanip.CloseFingers()
+	with self.env:
+	  self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
+	
+	self.robot.GetController().SetPath(traj)
+	self.robot.WaitForController(0)
+	self.taskmanip.CloseFingers()
 
 
 
@@ -180,35 +180,35 @@ class RoboHandler:
   # num_dofs_per_goal: number of IK solutions per grasp
   #######################################################
   def get_goal_dofs(self, num_goals=1, num_dofs_per_goal=1):
-    validgrasps,validindices = self.gmodel.computeValidGrasps(returnnum=num_goals) 
+	validgrasps,validindices = self.gmodel.computeValidGrasps(returnnum=num_goals) 
 
-    curr_IK = self.robot.GetActiveDOFValues()
+	curr_IK = self.robot.GetActiveDOFValues()
 
-    goal_dofs = np.array([])
-    for grasp, graspindices in zip(validgrasps, validindices):
-      Tgoal = self.gmodel.getGlobalGraspTransform(grasp, collisionfree=True)
-      sols = self.manip.FindIKSolutions(Tgoal, openravepy.IkFilterOptions.CheckEnvCollisions)
+	goal_dofs = np.array([])
+	for grasp, graspindices in zip(validgrasps, validindices):
+	  Tgoal = self.gmodel.getGlobalGraspTransform(grasp, collisionfree=True)
+	  sols = self.manip.FindIKSolutions(Tgoal, openravepy.IkFilterOptions.CheckEnvCollisions)
 
-      # magic that makes sols only the unique elements - sometimes there are multiple IKs
-      sols = np.unique(sols.view([('',sols.dtype)]*sols.shape[1])).view(sols.dtype).reshape(-1,sols.shape[1]) 
-      sols_scores = []
-      for sol in sols:
-        sols_scores.append( (sol, np.linalg.norm(sol-curr_IK)) )
+	  # magic that makes sols only the unique elements - sometimes there are multiple IKs
+	  sols = np.unique(sols.view([('',sols.dtype)]*sols.shape[1])).view(sols.dtype).reshape(-1,sols.shape[1]) 
+	  sols_scores = []
+	  for sol in sols:
+		sols_scores.append( (sol, np.linalg.norm(sol-curr_IK)) )
 
-      # sort by closest to current IK
-      sols_scores.sort(key=lambda tup:tup[1])
-      sols = np.array([x[0] for x in sols_scores])
-      
-      # sort randomly
-      #sols = np.random.permutation(sols)
+	  # sort by closest to current IK
+	  sols_scores.sort(key=lambda tup:tup[1])
+	  sols = np.array([x[0] for x in sols_scores])
+	  
+	  # sort randomly
+	  #sols = np.random.permutation(sols)
 
-      #take up to num_dofs_per_goal
-      last_ind = min(num_dofs_per_goal, sols.shape[0])
-      goal_dofs = np.append(goal_dofs,sols[0:last_ind])
+	  #take up to num_dofs_per_goal
+	  last_ind = min(num_dofs_per_goal, sols.shape[0])
+	  goal_dofs = np.append(goal_dofs,sols[0:last_ind])
 
-    goal_dofs = goal_dofs.reshape(goal_dofs.size/7, 7)
+	goal_dofs = goal_dofs.reshape(goal_dofs.size/7, 7)
 
-    return goal_dofs
+	return goal_dofs
 
 
   ### TODO ###  
@@ -220,40 +220,40 @@ class RoboHandler:
   #######################################################
   ##########MARSH###############
   def search_to_goal_depthfirst(self, goals):
-    visited_nodes = {}
-    nodes = Queue.LifoQueue()
-    start = self.robot.GetActiveDOFValues()
-    nodes.put(start)
-    print 'test'
-    trajectory = np.array([])
-    for g in goals: #for each of the goal states
-        goal_reached = False
-        while not nodes.empty() and not goal_reached: #while the queue has nodes
-            currentNode = nodes.get() #pop the next node
-            if np.allclose(currentNode,g): #check if we reached the current goal
-                goal_reached = True                
-                continue #jump out of the loop
+	visited_nodes = {}
+	nodes = Queue.LifoQueue()
+	start = self.robot.GetActiveDOFValues()
+	nodes.put(start)
+	print 'test'
+	trajectory = np.array([])
+	for g in goals: #for each of the goal states
+		goal_reached = False
+		while not nodes.empty() and not goal_reached: #while the queue has nodes
+			currentNode = nodes.get() #pop the next node
+			if np.allclose(currentNode,g): #check if we reached the current goal
+				goal_reached = True				
+				continue #jump out of the loop
 
-                neighbors = self.transition_config(currentNode)
-            
-                for c in neighbors:
-                    if not self.convert_for_dict(c) in visited_nodes.keys():
-                            visited_nodes[self.convert_for_dict(c)] = currentNode
-                            nodes.put(c)
-                    print np.size(c)        
-            	     
-        r= currentNode                                                      #Ankit
-        while r is not start:
-                trajectory = np.append(trajectory,r)
-                r = visited_nodes[self.convert_for_dict(r)]
-        start = g
-        
-        #nodes.queue.clear()
-        nodes.put(start)
-    trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+				neighbors = self.transition_config(currentNode)
+			
+				for c in neighbors:
+					if not self.convert_for_dict(c) in visited_nodes.keys():
+							visited_nodes[self.convert_for_dict(c)] = currentNode
+							nodes.put(c)
+					print np.size(c)		
+					 
+		r= currentNode													  #Ankit
+		while r is not start:
+				trajectory = np.append(trajectory,r)
+				r = visited_nodes[self.convert_for_dict(r)]
+		start = g
+		
+		#nodes.queue.clear()
+		nodes.put(start)
+	trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))			  #~Ankit
 
-    print 'Found goal' + g
-    return trajectory                                                           #Ankit #~Ankit
+	print 'Found goal' + g
+	return trajectory														   #Ankit #~Ankit
 
   ### TODO ###  
   #######################################################
@@ -284,7 +284,7 @@ class RoboHandler:
 						print "distance to goal", (currentNode-g)						#to check distance from goal
 						
 						if (currentNode-g).all()<1: #check if we reached the current goal
-								goal_reached = True                
+								goal_reached = True				
 								print "Goal Reached?",goal_reached
 								continue #jump out of the loop
 
@@ -295,8 +295,8 @@ class RoboHandler:
 										if not self.convert_for_dict(c) in visited_nodes.keys():
 												visited_nodes[self.convert_for_dict(c)] = currentNode
 												nodes.append(c)
-                        #print c    
-            #print currentNode
+						#print c	
+			#print currentNode
 				visited_nodes[self.convert_for_dict(g)] = currentNode 
 				print "visited_nodes:", visited_nodes
 				r = g 
@@ -307,7 +307,7 @@ class RoboHandler:
 				start = g
 				nodes = collections.deque()
 				nodes.append(start)
-		trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+		trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))			  #~Ankit
 
 		print "trajectory", trajectory
 		return trajectory
@@ -321,7 +321,7 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_astar(self, goals):
-    return
+	return
 
 
 
@@ -331,38 +331,38 @@ class RoboHandler:
 #  Collision Check
 ###################################################
   def check_collision(self, DOFs):
-    current_DOFs = self.robot.GetActiveDOFValues()
-    with self.env:
-        self.robot.SetActiveDOFValues(DOFs)
-        collision1 = self.env.CheckCollision(self.robot) 
-        collision2 = self.robot.CheckSelfCollision()
-        self.robot.SetActiveDOFValues(current_DOFs)
-    return collision1 or collision2
+	current_DOFs = self.robot.GetActiveDOFValues()
+	with self.env:
+		self.robot.SetActiveDOFValues(DOFs)
+		collision1 = self.env.CheckCollision(self.robot) 
+		collision2 = self.robot.CheckSelfCollision()
+		self.robot.SetActiveDOFValues(current_DOFs)
+	return collision1 or collision2
 
   ### TODO ###  (not required but I found it useful)
   #######################################################
   # Pick a heuristic for 
   #######################################################
   def config_to_priorityqueue_tuple(self, dist, config, goals):
-    # you can use either of these - make sure to replace the 0 with your
-    # priority queue value!
-    return (0.0, config.tolist())
-    return (0.0, self.convert_for_dict(config))
+	# you can use either of these - make sure to replace the 0 with your
+	# priority queue value!
+	return (0.0, config.tolist())
+	return (0.0, self.convert_for_dict(config))
 
 
   #######################################################
   # Convert to and from numpy array to a hashable function
   #######################################################
   def convert_for_dict(self, item):
-    item = np.array(item)*100.
-    return tuple(item.astype(int))
-    #return tuple(item)
+	item = np.array(item)*100.
+	return tuple(item.astype(int))
+	#return tuple(item)
 
   def convert_from_dictkey(self, item):
-    print "convert_from dictkey"
-    print np.array(item)/100.
-    return np.array(item)/100.
-    #return np.array(item)
+	print "convert_from dictkey"
+	print np.array(item)/100.
+	return np.array(item)/100.
+	#return np.array(item)
 
 
 
@@ -374,12 +374,12 @@ class RoboHandler:
   #######################################################
   def init_transition_arrays(self):
 #######  SSR  #####
-    positive_transition = np.identity(7)*TRANS_PER_DIR;
-    negative_transition= positive_transition*-1;
-    self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
+	positive_transition = np.identity(7)*TRANS_PER_DIR;
+	negative_transition= positive_transition*-1;
+	self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
 
-    #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
-    return 
+	#self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
+	return 
 
 
   ### TODO ###  (not required but I found it useful)
@@ -388,13 +388,13 @@ class RoboHandler:
   # transition arrays to it
   #######################################################
   def transition_config(self, config):
-    ######## SSR  ######
-    new_configs = np.array([]) #define blank array
-    for c in self.transition_arrays: #loop through columns
-        new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
-    new_configs = np.reshape(new_configs, (14, 7)) #reshape
-    #print new_configs
-    return new_configs
+	######## SSR  ######
+	new_configs = np.array([]) #define blank array
+	for c in self.transition_arrays: #loop through columns
+		new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
+	new_configs = np.reshape(new_configs, (14, 7)) #reshape
+	#print new_configs
+	return new_configs
 
 
   #######################################################
@@ -402,12 +402,12 @@ class RoboHandler:
   # that goes between them
   #######################################################
   def points_to_traj(self, points):
-    traj = openravepy.RaveCreateTrajectory(self.env,'')
-    traj.Init(self.robot.GetActiveConfigurationSpecification())
-    for idx,point in enumerate(points):
-      traj.Insert(idx,point)
-    openravepy.planningutils.RetimeActiveDOFTrajectory(traj,self.robot,hastimestamps=False,maxvelmult=1,maxaccelmult=1,plannername='ParabolicTrajectoryRetimer')
-    return traj
+	traj = openravepy.RaveCreateTrajectory(self.env,'')
+	traj.Init(self.robot.GetActiveConfigurationSpecification())
+	for idx,point in enumerate(points):
+	  traj.Insert(idx,point)
+	openravepy.planningutils.RetimeActiveDOFTrajectory(traj,self.robot,hastimestamps=False,maxvelmult=1,maxaccelmult=1,plannername='ParabolicTrajectoryRetimer')
+	return traj
 
 
 
@@ -418,9 +418,9 @@ class RoboHandler:
   # returns the distance AND closest goal
   #######################################################
   def min_euclid_dist_to_goals(self, config, goals):
-    # replace the 0 and goal with the distance and closest goal
-    
-    return 0, goals[0]
+	# replace the 0 and goal with the distance and closest goal
+	
+	return 0, goals[0]
 
 
   ### TODO ###  (not required but I found it useful)
@@ -430,9 +430,9 @@ class RoboHandler:
   # returns the distance AND closest goal
   #######################################################
   def min_manhattan_dist_to_goals(self, config, goals):
-    # replace the 0 and goal with the distance and closest goal
-    return 0, goals[0]
-    
+	# replace the 0 and goal with the distance and closest goal
+	return 0, goals[0]
+	
   
 
 
@@ -443,19 +443,19 @@ class RoboHandler:
   # close the fingers when you get to the grasp position
   #######################################################
   def close_fingers(self):
-    self.taskmanip.CloseFingers()
-    self.robot.WaitForController(0) #ensures the robot isn't moving anymore
-    #self.robot.Grab(target) #attaches object to robot, so moving the robot will move the object now
+	self.taskmanip.CloseFingers()
+	self.robot.WaitForController(0) #ensures the robot isn't moving anymore
+	#self.robot.Grab(target) #attaches object to robot, so moving the robot will move the object now
 
 
 
 
 if __name__ == '__main__':
-    robo = RoboHandler()
-    temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
-    
-    #robo.init_transition_arrays()
-    #robo.search_to_goal_depthfirst(temp_goal)
-    #robo.search_to_goal_breadthfirst(temp_goal)
-    robo.run_simple_problem() #runs the simple problem
+	robo = RoboHandler()
+	temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
+	
+	#robo.init_transition_arrays()
+	#robo.search_to_goal_depthfirst(temp_goal)
+	#robo.search_to_goal_breadthfirst(temp_goal)
+	robo.run_simple_problem() #runs the simple problem
   #time.sleep(10000) #to keep the openrave window open
