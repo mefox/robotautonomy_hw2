@@ -117,9 +117,14 @@ class RoboHandler:
     
     
     self.init_transition_arrays()
-    #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
-    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
-    goal = [ 1.43, -1.20, -0.3, 2.37,-0.23, -1.29, -2.23]
+#    goal = [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+       
+#    goal = self.convert_for_dict(goal)
+#    goal = self.convert_from_dictkey(goal)
+#    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+    self.start = [1.2, -1.10, -0.3, 2.3, -0.2, -1.2, -2.2]
+    goal = [ 0.9, -1.1, -0.2,  2.2, -0.2, -1.0, -2.2] 
+# goal = [ 1.4, -1.30, -0.2, 2.3,-0.2, -1.2, -2.2]
     with self.env:
       self.robot.SetActiveDOFValues(self.start)
 
@@ -321,7 +326,7 @@ class RoboHandler:
 #        return trajectory
 ###################################################################################
         g=goals[0]
-#        print 'g', g
+        print 'g', g
         goal_reached = False
         while nodes and not goal_reached: #while the queue has nodes
             currentNode = nodes.popleft() #pop the next node
@@ -332,11 +337,11 @@ class RoboHandler:
                 print"Current Node at goal reached", currentNode
                 print"G at goal reached", g
                 continue #jump out of the loop
-            print 'curent node:', currentNode
+#            print 'curent node:', currentNode
             neighbors = self.transition_config(currentNode)
-            print "neighbors:",  neighbors
+#            print "neighbors:",  neighbors
             for c in neighbors:
-              if not self.check_collision(c):
+#              if not self.check_collision(c):
 #                print 'c:', c
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
 #                    if c not in 
@@ -360,9 +365,9 @@ class RoboHandler:
         print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
         while r is not start:
             trajectory = np.append(trajectory,r)
-            a = trajectory[0]
-            b = trajectory [1]
-            c = trajectory [2]
+#            a = trajectory[0]
+#            b = trajectory [1]
+#            c = trajectory [2]
             r = parents[self.convert_for_dict(r)]
 #            print r
         trajectory = np.append(trajectory,r)
