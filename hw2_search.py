@@ -117,8 +117,8 @@ class RoboHandler:
     
     
     self.init_transition_arrays()
-    #goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
-	goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
+    goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
+    #goal = [ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746]
 
     self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
     #goal = [ 1.43, -1.30, -0.3, 2.37,-0.23, -1.29, -2.23]
@@ -487,8 +487,27 @@ class RoboHandler:
   #######################################################
   def min_euclid_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
+    distance = np.array([])
+    for g in goals: #for each of the goal states passed
+        #print "g is", g
+        print "difference is", (np.array(g) - np.array(config))
+        euclid_dist = np.linalg.norm(np.array(g) - np.array(config)) #returns the absolute value of the euclidean distance
+        distance = np.append(distance,euclid_dist) #built up a numpy array of distances
+        print "the distance(s) are:", distance
     
-    return 0, goals[0]
+    #Fine out which goal is the closest and what distance that is
+    index = 0
+    smallest = distance[index]
+    for i in range(6):
+        if distance[i] > distance[i+1]:
+            smallest = distance[i+1]
+            index = i+1 # store the goal index
+
+    print "the shortest distance is: ", smallest
+    print "the closest goal is: ", goals[index]
+    #print "sorted is: ", sorted_distance
+	#return distance and shortest goal.
+    return smallest, goals[index]
 
 
   ### TODO ###  (not required but I found it useful)
@@ -499,7 +518,7 @@ class RoboHandler:
   #######################################################
   def min_manhattan_dist_to_goals(self, config, goals):
     # replace the 0 and goal with the distance and closest goal
-	
+ 
     return 0, goals[0]
     
   
@@ -521,8 +540,20 @@ class RoboHandler:
 
 if __name__ == '__main__':
     robo = RoboHandler()
-    temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
-    
+    #temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
+    temp_goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23]
+    start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+
+    goals = np.array([[ 0.93422058, -1.10221021, -0.2       ,  2.27275587, -0.22977831, -1.09393251, -2.23921746],
+       [ 1.38238176, -1.05017481,  0.        ,  1.26568204,  0.15001448,  1.32813949, -0.06022621],
+       [ 1.16466262, -1.02175153, -0.3       ,  1.26568204, -2.62343746, -1.43813577, -0.37988181],
+       [ 3.45957137, -0.48619817,  0.        ,  2.0702298 , -1.12033301, -1.33241556,  1.85646563],
+       [ 1.65311863, -1.17157253,  0.4       ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
+       [ 1.59512823, -1.07309638,  0.5       ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
+       [ 1.67038884, -1.16082512,  0.4       ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
+
+    test = robo.min_euclid_dist_to_goals(start,goals)
+    print 'The euclid distance from the start to the temp is',test
     #robo.init_transition_arrays()
     #robo.search_to_goal_depthfirst(temp_goal)
     #robo.search_to_goal_breadthfirst(temp_goal)
