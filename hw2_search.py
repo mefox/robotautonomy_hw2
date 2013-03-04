@@ -130,9 +130,9 @@ class RoboHandler:
       self.robot.SetActiveDOFValues(self.start)
 
     
-    #self.robot.GetController().SetPath(traj)
-    #self.robot.WaitForController(0)
-    #self.taskmanip.CloseFingers()
+    self.robot.GetController().SetPath(traj)
+    self.robot.WaitForController(0)
+    self.taskmanip.CloseFingers()
 
 
   #######################################################
@@ -336,7 +336,7 @@ class RoboHandler:
             neighbors = self.transition_config(currentNode)
             print "neighbors:",  neighbors
             for c in neighbors:
-                                #if not self.check_collision(c):
+              if not self.check_collision(c):
 #                print 'c:', c
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
 #                    if c not in 
@@ -371,7 +371,8 @@ class RoboHandler:
         trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
     
         print "trajectory", trajectory
-        return trajectory
+	traj = self.points_to_traj(trajectory)
+        return traj
 ###########################################################################################################
   ### TODO ###  
   #######################################################
@@ -518,4 +519,4 @@ if __name__ == '__main__':
     #robo.search_to_goal_depthfirst(temp_goal)
     #robo.search_to_goal_breadthfirst(temp_goal)
     robo.run_simple_problem() #runs the simple problem
-  #time.sleep(10000) #to keep the openrave window open
+    time.sleep(10000) #to keep the openrave window open
