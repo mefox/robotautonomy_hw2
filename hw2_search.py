@@ -121,7 +121,7 @@ class RoboHandler:
        
 #    goal = self.convert_for_dict(goal)
 #    goal = self.convert_from_dictkey(goal)
-    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+    self.start = [1.233, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
 #    self.start = [1.2, -1.10, -0.3, 2.3, -0.2, -1.2, -2.2]
     goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23] 
 #    goal = [ 1.4, -1.30, -0.3, 2.3,-0.2, -1.2, -2.2]
@@ -271,8 +271,12 @@ class RoboHandler:
   #######################################################
   def search_to_goal_breadthfirst(self, goals):
         print "Doing breadth first search"
+
         #start = np.array(self.start) #copy the start state
         start = self.convert_from_dictkey(self.convert_for_dict(self.start))
+
+        #g=goals[0] #Takes the FIRST goal state
+        g=self.convert_from_dictkey(self.convert_for_dict(goals[0])) #Takes the FIRST goal state
 
         parents = {} #a dictionary to keep track of each node's parent
         visited_nodes=set([]) #a set of nodes that have been visited
@@ -288,28 +292,23 @@ class RoboHandler:
         nodes.append(start) #put the start state in the queue
 
         currentNode = start #initial the currentNode being operated on
-        
         trajectory = np.array([]) #Trajectory np array is blank
 
-        g=goals[0] #Takes the FIRST goal state
         print 'Goal state: ', g
         goal_reached = False
         while nodes and not goal_reached: #while the queue has nodes
             currentNode = nodes.popleft() #pop the next node
             trunc_currentNode = [self.convert_from_dictkey(self.convert_for_dict(currentNode))]
             trunc_g = [self.convert_from_dictkey(self.convert_for_dict(g))]
-            #print "Trunc current: ",trunc_currentNode
-            #print "Trunc g: ", trunc_g
 
-            if np.allclose(trunc_currentNode,trunc_g): #check if we reached the current goal
-            #if np.allclose(currentNode,g): #check if we reached the current goal
+            if np.allclose(currentNode,g): #check if we reached the current goal
                 goal_reached = True    
                 print "Goal Reached?",goal_reached
                 print"Current Node at goal reached", currentNode
                 print"G at goal reached", g
-                continue #jump out of the loop and go to rebuild the trajectory
+                continue #having set the goal_reached flag jump out of the loop and go to rebuild the trajectory
 
-            neighbors = self.transition_config(currentNode)
+            neighbors = self.transition_config(currentNode) #generate neighbors with transition function
 
             for c in neighbors: #for each of the neighbors to the current node
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited
