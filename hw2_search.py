@@ -218,7 +218,7 @@ class RoboHandler:
     return goal_dofs
 
 
-  ### TODO ###  
+  ### TODO:REPLICATE FROM BFS ###  
   #######################################################
   # DEPTH FIRST SEARCH
   # find a path from the current configuration to ANY goal in goals
@@ -262,7 +262,7 @@ class RoboHandler:
     print 'Found goal' + g
     return trajectory                                                           #Ankit #~Ankit
 
-  ### TODO ###  
+  ### TODO:CLEAN-UP ###  
   #######################################################
   # BREADTH FIRST SEARCH
   # find a path from the current configuration to ANY goal in goals
@@ -391,6 +391,11 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_astar(self, goals):
+    start = np.array(self.start)
+    nodes = Queue.PriorityQueue()
+    visited = {}
+
+ 
     return
 
 
@@ -416,8 +421,10 @@ class RoboHandler:
   def config_to_priorityqueue_tuple(self, dist, config, goals):
     # you can use either of these - make sure to replace the 0 with your
     # priority queue value!
-    return (0.0, config.tolist())
-    return (0.0, self.convert_for_dict(config))
+    cost_to_goal, goal = self.min_euclid_distance_to_goals(config,goals)
+    dist = dist + cost_to_goal
+    return (dist, config.tolist()), goal
+    #return (dist, self.convert_for_dict(config))
 
 
   #######################################################
@@ -436,7 +443,7 @@ class RoboHandler:
 
 
 
-  ### TODO ###  (not required but I found it useful)
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # Initialize the movements you can apply in any direction
   # Don't forget to use TRANS_PER_DIR - the max distance you
@@ -452,7 +459,7 @@ class RoboHandler:
     return 
 
 
-  ### TODO ###  (not required but I found it useful)
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # Take the current configuration and apply each of your
   # transition arrays to it
@@ -463,7 +470,6 @@ class RoboHandler:
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
-    #print new_configs
     return new_configs
 
 
@@ -481,7 +487,7 @@ class RoboHandler:
 
 
 
-  ### TODO ###  (not required but I found it useful)
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # minimum distance from config to any goal in goals
   # distance metric: euclidean
@@ -491,16 +497,16 @@ class RoboHandler:
     # replace the 0 and goal with the distance and closest goal
     goals1 = np.array([])
     for g in goals:
-    	eucd = np.linalg.norm(g-config) 
-	goals1 = np.append(goals1, np.append(g,eucd))
-    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))
-    goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
-    print goals1
-    close = goals1[0]
-    return close[-1], close[:7]
+    	eucd = np.linalg.norm(g-config)					#find eucledian distance between each of the goals 
+	goals1 = np.append(goals1, np.append(g,eucd))			#append [goal eucledian distance] to new matrix of goals 
+    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))			#reshape goals into a 2D array with a column height of 8
+    goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))	#sort goals1 according to the last element
+    close = goals1[0]							#closest goal is the first element in goals
+    return close[-1], close[:7]						#return last element of closest goal (distance), first 7 elements(goal)
 
 
-  ### TODO ###  (not required but I found it useful)
+
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # minimum distance from config to any goal in goals
   # distance metric: manhattan
