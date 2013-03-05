@@ -441,14 +441,14 @@ class RoboHandler:
   # Initialize the movements you can apply in any direction
   # Don't forget to use TRANS_PER_DIR - the max distance you
   # can move any joint in a step (defined above)
+  #
+  #This function initializes a transition function that can be
+  #use to generate 14 nearest neighbors
   #######################################################
   def init_transition_arrays(self):
-#######  SSR  #####
-    positive_transition = np.identity(7)*TRANS_PER_DIR;
-    negative_transition= positive_transition*-1;
-    self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0)
-
-    #self.transition_arrays = [[TRANS_PER_DIR,0,0,0,0,0,0],[0,TRANS_PER_DIR,0,0,0,0,0],[0,0,TRANS_PER_DIR,0,0,0,0],[0,0,0,TRANS_PER_DIR,0,0,0],[0,0,0,0,TRANS_PER_DIR,0,0],[0,0,0,0,0,TRANS_PER_DIR,0],[0,0,0,0,0,0,TRANS_PER_DIR]]
+    positive_transition = np.identity(7)*TRANS_PER_DIR; #Create a 7x7 np array with TRANS_PER_DIR down the diagonal
+    negative_transition= positive_transition*-1; #Create a 7x7 np array with neg TRANS_PER_DIR down the diagonal
+    self.transition_arrays = np.concatenate((positive_transition, negative_transition), axis = 0) #concatenate into 7x14 np array
     return 
 
 
