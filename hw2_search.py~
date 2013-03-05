@@ -218,7 +218,7 @@ class RoboHandler:
     return goal_dofs
 
 
-  ### TODO ###  
+  ### TODO:REPLICATE FROM BFS ###  
   #######################################################
   # DEPTH FIRST SEARCH
   # find a path from the current configuration to ANY goal in goals
@@ -227,42 +227,44 @@ class RoboHandler:
   #######################################################
   ##########MARSH###############
   def search_to_goal_depthfirst(self, goals):
-    visited_nodes = {}
-    nodes = Queue.LifoQueue()
-    start = self.robot.GetActiveDOFValues()
-    nodes.put(start)
-    print 'test'
-    trajectory = np.array([])
-    for g in goals: #for each of the goal states
-        goal_reached = False
-        while not nodes.empty() and not goal_reached: #while the queue has nodes
-            currentNode = nodes.get() #pop the next node
-            if np.allclose(currentNode,g): #check if we reached the current goal
-                goal_reached = True                
-                continue #jump out of the loop
 
-                neighbors = self.transition_config(currentNode)
-            
-                for c in neighbors:
-                    if not self.convert_for_dict(c) in visited_nodes.keys():
-                            visited_nodes[self.convert_for_dict(c)] = currentNode
-                            nodes.put(c)
-                    print np.size(c)        
-                     
-        r= currentNode                                                      #Ankit
-        while r is not start:
-                trajectory = np.append(trajectory,r)
-                r = visited_nodes[self.convert_for_dict(r)]
-        start = g
-        
-        #nodes.queue.clear()
-        nodes.put(start)
+
+#    visited_nodes = {}
+#    nodes = Queue.LifoQueue()
+#    start = self.robot.GetActiveDOFValues()
+#    nodes.put(start)
+#    print 'test'
+#    trajectory = np.array([])
+#    for g in goals: #for each of the goal states
+#        goal_reached = False
+#        while not nodes.empty() and not goal_reached: #while the queue has nodes
+#            currentNode = nodes.get() #pop the next node
+#            if np.allclose(currentNode,g): #check if we reached the current goal
+#                goal_reached = True                
+#                continue #jump out of the loop
+#
+#               neighbors = self.transition_config(currentNode)
+#          
+#   #             for c in neighbors:
+#    #                if not self.convert_for_dict(c) in visited_nodes.keys():
+#     #                       visited_nodes[self.convert_for_dict(c)] = currentNode
+#                      nodes.put(c)
+#             print np.size(c)        
+#             
+#        r= currentNode                                                      #Ankit
+#        while r is not start:
+#                trajectory = np.append(trajectory,r)
+#                r = visited_nodes[self.convert_for_dict(r)]
+#        start = g
+#        
+#        #nodes.queue.clear()
+#        nodes.put(start)
     trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
 
-    print 'Found goal' + g
+#    print 'Found goal' + g
     return trajectory                                                           #Ankit #~Ankit
 
-  ### TODO ###  
+  ### TODO:CLEAN-UP ###  
   #######################################################
   # BREADTH FIRST SEARCH
   # find a path from the current configuration to ANY goal in goals
@@ -306,12 +308,13 @@ class RoboHandler:
                 print "Goal Reached?",goal_reached
                 print"Current Node at goal reached", currentNode
                 print"G at goal reached", g
-                continue #jump out of the loop and go to rebuild the trajectory
+                continue #having set the goal_reached flag jump out of the loop and go to rebuild the trajectory
 
             neighbors = self.transition_config(currentNode) #generate neighbors with transition function
 
             for c in neighbors: #for each of the neighbors to the current node
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited
+                    #if not self.check_collision(c):#test to see if there is collision
                         visited_nodes.add(self.convert_for_dict(c)) #if so, add it to the visited set
                         parents[self.convert_for_dict(c)] = currentNode #and add it to the dictionary
                         nodes.append(c) #put it into the queue
@@ -343,6 +346,11 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_astar(self, goals):
+    start = np.array(self.start)
+    nodes = Queue.PriorityQueue()
+    visited = {}
+
+ 
     return
 
 
@@ -368,8 +376,10 @@ class RoboHandler:
   def config_to_priorityqueue_tuple(self, dist, config, goals):
     # you can use either of these - make sure to replace the 0 with your
     # priority queue value!
-    return (0.0, config.tolist())
-    return (0.0, self.convert_for_dict(config))
+    cost_to_goal, goal = self.min_euclid_distance_to_goals(config,goals)
+    dist = dist + cost_to_goal
+    return (dist, config.tolist()), goal
+    #return (dist, self.convert_for_dict(config))
 
 
   #######################################################
@@ -386,7 +396,7 @@ class RoboHandler:
 
 
 
-  ### TODO ###  (not required but I found it useful)
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # Initialize the movements you can apply in any direction
   # Don't forget to use TRANS_PER_DIR - the max distance you
@@ -402,7 +412,7 @@ class RoboHandler:
     return 
 
 
-  ### TODO ###  (not required but I found it useful)
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # Take the current configuration and apply each of your
   # transition arrays to it
@@ -413,7 +423,6 @@ class RoboHandler:
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
-    #print new_configs
     return new_configs
 
 
@@ -431,7 +440,7 @@ class RoboHandler:
 
 
 
-  ### TODO ###  (not required but I found it useful)
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # minimum distance from config to any goal in goals
   # distance metric: euclidean
@@ -441,16 +450,16 @@ class RoboHandler:
     # replace the 0 and goal with the distance and closest goal
     goals1 = np.array([])
     for g in goals:
-    	eucd = np.linalg.norm(g-config) 
-	goals1 = np.append(goals1, np.append(g,eucd))
-    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))
-    goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
-    print goals1
-    close = goals1[0]
-    return close[-1], close[:7]
+    	eucd = np.linalg.norm(g-config)					#find eucledian distance between each of the goals 
+	goals1 = np.append(goals1, np.append(g,eucd))			#append [goal eucledian distance] to new matrix of goals 
+    goals1 = np.reshape(goals1,(np.size(goals1)/8,8))			#reshape goals into a 2D array with a column height of 8
+    goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))	#sort goals1 according to the last element
+    close = goals1[0]							#closest goal is the first element in goals
+    return close[-1], close[:7]						#return last element of closest goal (distance), first 7 elements(goal)
 
 
-  ### TODO ###  (not required but I found it useful)
+
+  ### TODO:DONE ###  (not required but I found it useful)
   #######################################################
   # minimum distance from config to any goal in goals
   # distance metric: manhattan
