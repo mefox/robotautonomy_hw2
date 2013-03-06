@@ -62,6 +62,7 @@ class RoboHandler:
     self.env = openravepy.Environment()
     self.env.SetViewer('qtcoin')
     self.env.GetViewer().SetName('HW2 Viewer')
+    self.COIN_FULL_INDIRECT_RENDERING=1
     self.env.Load('models/%s.env.xml' %PACKAGE_NAME)
     # time.sleep(3) # wait for viewer to initialize. May be helpful to uncomment
     self.robot = self.env.GetRobots()[0]
@@ -346,10 +347,13 @@ class RoboHandler:
 #              if not self.check_collision(c):
 #                print 'c:', c
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
-#                    if c not in 
-                        visited_nodes.add(self.convert_for_dict(c))  
-                        parents[self.convert_for_dict(c)] = currentNode
-                        nodes.append(c)
+                  if not self.check_collision(c):
+#                    print 'added', c
+                    visited_nodes.add(self.convert_for_dict(c))  
+#                    if not self.check_collision(c):
+           
+                    parents[self.convert_for_dict(c)] = currentNode
+                    nodes.append(c)
                         #print c    
             #print currentNode
 #        visited_nodes.add(self.convert_for_dict(g))
@@ -373,7 +377,7 @@ class RoboHandler:
 #            c = trajectory [2]
             r = parents[self.convert_for_dict(r)]
 #            print r
-        trajectory = np.append(trajectory,r)
+#        trajectory = np.append(trajectory,r)
         nodes = collections.deque()
         nodes.append(start)
         trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
@@ -401,13 +405,24 @@ class RoboHandler:
 #  Collision Check
 ###################################################
   def check_collision(self, DOFs):
-    current_DOFs = self.robot.GetActiveDOFValues()
+#    current_DOFs = self.start
+    dof_limits = self.robot.GetActiveDOFLimits()
+    lower_limit = dof_limits[0]
+    upper_limit = dof_limits[1]
+#    print np.shape(lower_limit)
     with self.env:
         self.robot.SetActiveDOFValues(DOFs)
-        collision1 = self.env.CheckCollision(self.robot) 
+#        collision1 = self.env.CheckCollision(self.robot)
+        end_limits = (lower_limit<DOFs).all() and (upper_limit>DOFs).all()
+        
+        if not end_limits:
+            return True
+#        print end_limits
+#        print collision1, DOFs
         collision2 = self.robot.CheckSelfCollision()
-        self.robot.SetActiveDOFValues(current_DOFs)
-    return collision1 or collision2
+        #self.robot.SetActiveDOFValues(current_DOFs)
+        
+    return collision2 #or collision2
 
   ### TODO ###  (not required but I found it useful)
   #######################################################
@@ -542,6 +557,6 @@ if __name__ == '__main__':
     #robo.init_transition_arrays()
     #robo.search_to_goal_depthfirst(temp_goal)
     #robo.search_to_goal_breadthfirst(temp_goal)
-    #robo.run_simple_problem() #runs the simple problem
-    robo.run_difficult_problem()
+    robo.run_simple_problem() #runs the simple problem
+    #robo.run_difficult_problem()
     time.sleep(10000) #to keep the openrave window open
