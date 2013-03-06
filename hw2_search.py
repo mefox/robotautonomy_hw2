@@ -62,6 +62,7 @@ class RoboHandler:
     self.env = openravepy.Environment()
     self.env.SetViewer('qtcoin')
     self.env.GetViewer().SetName('HW2 Viewer')
+    self.COIN_FULL_INDIRECT_RENDERING=1
     self.env.Load('models/%s.env.xml' %PACKAGE_NAME)
     # time.sleep(3) # wait for viewer to initialize. May be helpful to uncomment
     self.robot = self.env.GetRobots()[0]
@@ -121,7 +122,7 @@ class RoboHandler:
        
 #    goal = self.convert_for_dict(goal)
 #    goal = self.convert_from_dictkey(goal)
-    self.start = [1.233, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
+    self.start = [1.23, -1.10, -0.3, 2.37, -0.23, -1.29, -2.23]
 #    self.start = [1.2, -1.10, -0.3, 2.3, -0.2, -1.2, -2.2]
     goal = [ 0.93, -1.10, -0.2,  2.27, -0.23, -1.09, -2.23] 
 #    goal = [ 1.4, -1.30, -0.3, 2.3,-0.2, -1.2, -2.2]
@@ -218,7 +219,7 @@ class RoboHandler:
     return goal_dofs
 
 
-  ### TODO:REPLICATE FROM BFS ###  
+  ### TODO ###  
   #######################################################
   # DEPTH FIRST SEARCH
   # find a path from the current configuration to ANY goal in goals
@@ -327,7 +328,7 @@ class RoboHandler:
 #    print 'Found goal' + g
     return trajectory                                                           #Ankit #~Ankit
 
-  ### TODO:CLEAN-UP ###  
+  ### TODO ###  
   #######################################################
   # BREADTH FIRST SEARCH
   # find a path from the current configuration to ANY goal in goals
@@ -363,8 +364,9 @@ class RoboHandler:
         goal_reached = False
         while nodes and not goal_reached: #while the queue has nodes
             currentNode = nodes.popleft() #pop the next node
-            trunc_currentNode = [self.convert_from_dictkey(self.convert_for_dict(currentNode))]
-            trunc_g = [self.convert_from_dictkey(self.convert_for_dict(g))]
+          #            print "distance to goal:", (currentNode-g)    
+         #   trunc_currentNode = [self.convert_from_dictkey(self.convert_for_dict(currentNode))]
+          #  trunc_g = [self.convert_from_dictkey(self.convert_for_dict(g))]
 
             if np.allclose(currentNode,g): #check if we reached the current goal
                 goal_reached = True    
@@ -372,34 +374,59 @@ class RoboHandler:
                 print"Current Node at goal reached", currentNode
                 print"G at goal reached", g
                 continue #having set the goal_reached flag jump out of the loop and go to rebuild the trajectory
-
             neighbors = self.transition_config(currentNode) #generate neighbors with transition function
-
             for c in neighbors: #for each of the neighbors to the current node
+<<<<<<< HEAD
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited
                     #if not self.check_collision(c):#test to see if there is collision
                         visited_nodes.add(self.convert_for_dict(c)) #if so, add it to the visited set
                         parents[self.convert_for_dict(c)] = currentNode #and add it to the dictionary
                         nodes.append(c) #put it into the queue
+=======
+#              if not self.check_collision(c):
+#                print 'c:', c
+                if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
+                  if not self.check_collision(c):
+#                    print 'added', c
+                    visited_nodes.add(self.convert_for_dict(c))  
+#                    if not self.check_collision(c):
+           
+                    parents[self.convert_for_dict(c)] = currentNode
+                    nodes.append(c) #put it into the queue
+                        #print c    
+            #print currentNode
+#        visited_nodes.add(self.convert_for_dict(g))
+#        print 'visited nodes : ', visited_nodes
+#        parents[self.convert_for_dict(g)] = currentNode 
+#        print "parents:", parents
+>>>>>>> 77441506285801b69253808ecaa962ca4c319a5e
         
-
-        #Once we find the goal, rebuild the trajectory
-        r = currentNode
+ #Once we find the goal, rebuild the trajectory
+        r = currentNode 
+        print "r", r
+        print 'start', start
+        print len(parents)
+        print len(visited_nodes)
+        a1 = parents[self.convert_for_dict(r)]
+        a2 = parents[self.convert_for_dict(a1)]
+        a3 = parents[self.convert_for_dict(a2)]
+        print 'a1: ', a1, ' a2: ', a2, ' a3: ', a3
         while r is not start: #traverse through parents until the start state is reached
             trajectory = np.append(trajectory,r)
+#            a = trajectory[0]
+#            b = trajectory [1]
+#            c = trajectory [2]
             r = parents[self.convert_for_dict(r)]
-
-        #trajectory = np.append(trajectory,r)
+#            print r
+#        trajectory = np.append(trajectory,r)
         nodes = collections.deque()
         nodes.append(start)
-        trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))
-        trajectory[0]= goals[0] #Rewrite the last value with the exact goal value
-        trajectory = trajectory[::-1] #Reverse the trajectory to get a path that goes from start to goal
-        print "The trajectory is: \n", trajectory
-
+        trajectory = np.reshape(trajectory,(np.size(trajectory)/7,7))              #~Ankit
+#        trajectory[0]= [ 0.93422058, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]  #make this better!!!!####
+        trajectory = trajectory[::-1]
+        print "trajectory", trajectory
         traj = self.points_to_traj(trajectory)
         return traj
-
 ###########################################################################################################
   ### TODO ###  
   #######################################################
@@ -409,11 +436,6 @@ class RoboHandler:
   # RETURN: a trajectory to the goal
   #######################################################
   def search_to_goal_astar(self, goals):
-    start = np.array(self.start)
-    nodes = Queue.PriorityQueue()
-    visited = {}
-
- 
     return
 
 
@@ -424,13 +446,24 @@ class RoboHandler:
 #  Collision Check
 ###################################################
   def check_collision(self, DOFs):
-    current_DOFs = self.robot.GetActiveDOFValues()
+#    current_DOFs = self.start
+    dof_limits = self.robot.GetActiveDOFLimits()
+    lower_limit = dof_limits[0]
+    upper_limit = dof_limits[1]
+#    print np.shape(lower_limit)
     with self.env:
         self.robot.SetActiveDOFValues(DOFs)
-        collision1 = self.env.CheckCollision(self.robot) 
+#        collision1 = self.env.CheckCollision(self.robot)
+        end_limits = (lower_limit<DOFs).all() and (upper_limit>DOFs).all()
+        
+        if not end_limits:
+            return True
+#        print end_limits
+#        print collision1, DOFs
         collision2 = self.robot.CheckSelfCollision()
-        self.robot.SetActiveDOFValues(current_DOFs)
-    return collision1 or collision2
+        #self.robot.SetActiveDOFValues(current_DOFs)
+        
+    return collision2 #or collision2
 
   ### TODO ###  (not required but I found it useful)
   #######################################################
@@ -454,6 +487,8 @@ class RoboHandler:
     #return tuple(item)
 
   def convert_from_dictkey(self, item):
+#    print "convert_from dictkey"
+#    print np.array(item)/100.
     return np.array(item)/100.
     #return np.array(item)
 
@@ -486,6 +521,7 @@ class RoboHandler:
     for c in self.transition_arrays: #loop through columns
         new_configs = np.concatenate((new_configs, c + config), axis = 0) #assemble new configuration
     new_configs = np.reshape(new_configs, (14, 7)) #reshape
+    #print new_configs
     return new_configs
 
 
