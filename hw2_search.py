@@ -164,9 +164,9 @@ class RoboHandler:
        [ 1.65311863, -1.17157253,  0.4       ,  2.18692683, -2.38248898,  0.73272595, -0.23680544],
        [ 1.59512823, -1.07309638,  0.5       ,  2.26315055,  0.57257592, -1.15576369, -0.30723627],
        [ 1.67038884, -1.16082512,  0.4       ,  2.05339849, -2.0205527 ,  0.54970211, -0.4386743 ]])
-    print self.min_manhattan_dist_to_goals([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856],goals)
+    self.start = np.array([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856]) 
     with self.env:
-      self.robot.SetActiveDOFValues([5.459, -0.981,  -1.113,  1.473 , -1.124, -1.332,  1.856])
+      self.robot.SetActiveDOFValues(self.start)
 
     # get the trajectory!
     traj = self.search_to_goal_astar(goals)
@@ -392,11 +392,72 @@ class RoboHandler:
   #######################################################
   def search_to_goal_astar(self, goals):
     start = np.array(self.start)
-    nodes = Queue.PriorityQueue()
-    visited = {}
+    goals = np.array(goals)
+    openset = Queue.PriorityQueue()
+    closedset = set([])
+    came_from = {}
+    g_score = {}
+    g_score[self.convert_for_dict(start)] = 0
+    dist, goal = self.min_manhattan_dist_to_goals(start, goals)
+    #goal = np.int_(goal*100)/100. 
+    openset.put(self.config_to_priorityqueue_tuple(dist, start, goals))
+    came_from[self.convert_for_dict(start)] = None
+    while not openset.empty():
+	temp = openset.get()
+	current = np.array(temp[1])
+	dist = temp[0]
+	dist1, g = self.min_euclid_dist_to_goals(current, goals)
+	if dist1<0.1:		#ankit
+		print "success"
+		break
 
- 
-    return
+	closedset.add(self.convert_for_dict(current))
+	neighbors = self.transition_config(current)
+	for neighbor in neighbors:
+		tentative_score = g_score[self.convert_for_dict(current)] + TRANS_PER_DIR
+
+		if self.convert_for_dict(neighbor) in closedset:
+			if tentative_score >= g_score[self.convert_for_dict(neighbor)]:				
+				continue
+
+		if self.convert_for_dict(neighbor) not in g_score.keys(): 
+			if not self.check_collision(neighbor):
+				came_from[self.convert_for_dict(neighbor)] = current
+				g_score[self.convert_for_dict(neighbor)] = tentative_score
+ 				dist, goal = self.min_manhattan_dist_to_goals(neighbor, goals)
+				#goal = np.int_(goal*100)/100.
+				openset.put(self.config_to_priorityqueue_tuple(dist, neighbor, goals))
+		else:
+			if tentative_score < g_score[self.convert_for_dict(neighbor)]:
+				g_score[self.convert_for_dict(neighbor)] = tentative_score
+	
+    r = current
+    print r
+    trajectory = np.array([])
+    #a1 = came_from[self.convert_for_dict(r)]
+    #print "a1", a1
+    #a2 = came_from[self.convert_for_dict(a1)]
+    #a3 = came_from[self.convert_for_dict(a2)]
+    #a4 = came_from[self.convert_for_dict(a3)]
+    #print "a1", a1
+    #print "a2", a2
+    #print "a3", a3
+    #print "a4", a4
+    #print came_from
+    #print r
+    trajectory = np.append(trajectory,goal)
+    r = came_from[self.convert_for_dict(r)]
+    while r is not None:
+       	trajectory = np.append(trajectory,r)
+       	r = came_from[self.convert_for_dict(r)]
+        trajectory = np.append(trajectory,r)
+    trajectory = trajectory[0:np.size(trajectory)-1]
+    trajectory = np.reshape(trajectory, (np.size(trajectory)/7,7))              #~Ankit
+
+    trajectory = trajectory[::-1]
+    print trajectory	
+    #print "failure"
+    return self.points_to_traj(trajectory)
 
 
 
@@ -411,7 +472,7 @@ class RoboHandler:
         self.robot.SetActiveDOFValues(DOFs)
         collision1 = self.env.CheckCollision(self.robot) 
         collision2 = self.robot.CheckSelfCollision()
-        self.robot.SetActiveDOFValues(current_DOFs)
+        #self.robot.SetActiveDOFValues(current_DOFs)
     return collision1 or collision2
 
   ### TODO ###  (not required but I found it useful)
@@ -421,9 +482,7 @@ class RoboHandler:
   def config_to_priorityqueue_tuple(self, dist, config, goals):
     # you can use either of these - make sure to replace the 0 with your
     # priority queue value!
-    cost_to_goal, goal = self.min_euclid_distance_to_goals(config,goals)
-    dist = dist + cost_to_goal
-    return (dist, config.tolist()), goal
+    return (dist, config.tolist())
     #return (dist, self.convert_for_dict(config))
 
 
@@ -436,8 +495,8 @@ class RoboHandler:
     #return tuple(item)
 
   def convert_from_dictkey(self, item):
-    print "convert_from dictkey"
-    print np.array(item)/100.
+    #print "convert_from dictkey"
+    #print np.array(item)/100.
     return np.array(item)/100.
     #return np.array(item)
 
@@ -520,7 +579,7 @@ class RoboHandler:
 	goals1 = np.append(goals1, np.append(g, man))
     goals1 = np.reshape(goals1,(np.size(goals1)/8,8))
     goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
-    print goals1
+    #print goals1
     close = goals1[0]
     return close[-1], close[:7]
      
