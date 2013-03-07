@@ -240,7 +240,7 @@ class RoboHandler:
         visited_nodes=set([]) #a set of nodes that have been visited
         nodes = collections.deque() #a queue used to keep track of nodes needing to be searched
         
-       
+        flag_coll_check = True
         print "Start state:", start
         parents[self.convert_for_dict(start)] = None #set the start point to have a parent of None
         visited_nodes.add(self.convert_for_dict(start)) #add the start state to the list of visited nodes
@@ -264,7 +264,7 @@ class RoboHandler:
             for c in neighbors: #for each of the neighbors to the current node
 
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
-                  if not self.check_collision(c):
+                  if not self.check_collision(c,flag_coll_check):
                     visited_nodes.add(self.convert_for_dict(c))  
            
                     parents[self.convert_for_dict(c)] = currentNode
@@ -310,7 +310,7 @@ class RoboHandler:
         visited_nodes=set([]) #a set of nodes that have been visited
         nodes = collections.deque() #a queue used to keep track of nodes needing to be searched
         
-       
+        flag_coll_check = True
         print "Start state:", start
         parents[self.convert_for_dict(start)] = None #set the start point to have a parent of None
         visited_nodes.add(self.convert_for_dict(start)) #add the start state to the list of visited nodes
@@ -334,7 +334,7 @@ class RoboHandler:
             for c in neighbors: #for each of the neighbors to the current node
 
                 if self.convert_for_dict(c) not in visited_nodes:    #test if neighbor has not been visited    
-                  if not self.check_collision(c):
+                  if not self.check_collision(c,flag_coll_check):
                     visited_nodes.add(self.convert_for_dict(c))  
            
                     parents[self.convert_for_dict(c)] = currentNode
@@ -375,6 +375,7 @@ class RoboHandler:
     closedset = set([])
     came_from = {}
     g_score = {}
+    flag_coll_check = False
     g_score[self.convert_for_dict(start)] = 0
     dist, goal = self.min_manhattan_dist_to_goals(start, goals)
     #goal = np.int_(goal*100)/100. 
@@ -399,7 +400,7 @@ class RoboHandler:
 				continue
 
 		if self.convert_for_dict(neighbor) not in g_score.keys(): 
-			if not self.check_collision(neighbor):
+			if not self.check_collision(neighbor,flag_coll_check):
 				came_from[self.convert_for_dict(neighbor)] = current
 				g_score[self.convert_for_dict(neighbor)] = tentative_score
 
@@ -435,7 +436,7 @@ class RoboHandler:
 ###################################################
 #  Collision Check
 ###################################################
-  def check_collision(self, DOFs):
+  def check_collision(self, DOFs, flag):
 #    current_DOFs = self.start
     dof_limits = self.robot.GetActiveDOFLimits()
     lower_limit = dof_limits[0]
@@ -451,10 +452,10 @@ class RoboHandler:
 #        print collision1, DOFs
      
       ########################Comment this section while running BFS##############################
-
-        collision1 = self.env.CheckCollision(self.robot)
-        if collision1:
-            return True
+        if not flag:
+          collision1 = self.env.CheckCollision(self.robot)
+          if collision1:
+              return True
         
       ########################End of Section to be commented######################################
         collision2 = self.robot.CheckSelfCollision()
@@ -567,7 +568,7 @@ class RoboHandler:
     goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
     #print goals1
     close = goals1[0]
-    inflation = 1 
+    inflation = 2        #Inflation epsilon
     return inflation*close[-1], close[:7]
      
   
@@ -591,10 +592,10 @@ if __name__ == '__main__':
     robo = RoboHandler()
     #temp_goal = [ [0.93422050, -1.10221021, -0.2,  2.27275587, -0.22977831, -1.09393251, -2.23921746]]
     
-    #robo.init_transition_arrays()
-    #robo.search_to_goal_depthfirst(temp_goal)
-    #robo.search_to_goal_breadthfirst(temp_goal)
-#    robo.run_simple_problem() #runs the simple problem    ######please see the collision function for comments before calling this function
-    time.sleep(5)                                       
-    robo.run_difficult_problem()                         ######please see the collision function for comments before calling this function
+    robo.init_transition_arrays()
+#    #robo.search_to_goal_depthfirst(temp_goal)
+#    #robo.search_to_goal_breadthfirst(temp_goal)
+    robo.run_simple_problem() #runs the simple problem    ######please see the collision function for comments before calling this function
+#    time.sleep(5)                                       
+#    robo.run_difficult_problem()                         ######please see the collision function for comments before calling this function
     time.sleep(10000) #to keep the openrave window open
