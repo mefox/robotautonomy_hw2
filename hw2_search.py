@@ -568,7 +568,7 @@ class RoboHandler:
     goals1 = np.array(sorted(goals1, key=lambda goals1:goals1[-1]))
     #print goals1
     close = goals1[0]
-    inflation = 2        #Inflation epsilon
+    inflation = 1.5        #Inflation epsilon  #Make this 1 for A star
     return inflation*close[-1], close[:7]
      
   
@@ -595,7 +595,7 @@ if __name__ == '__main__':
     robo.init_transition_arrays()
 #    #robo.search_to_goal_depthfirst(temp_goal)
 #    #robo.search_to_goal_breadthfirst(temp_goal)
-    robo.run_simple_problem() #runs the simple problem    ######please see the collision function for comments before calling this function
+    robo.run_simple_problem() #runs the simple problem    
 #    time.sleep(5)                                       
-#    robo.run_difficult_problem()                         ######please see the collision function for comments before calling this function
+#    robo.run_difficult_problem()                         #Currently runs A* with an inflation of 1.5
     time.sleep(10000) #to keep the openrave window open
